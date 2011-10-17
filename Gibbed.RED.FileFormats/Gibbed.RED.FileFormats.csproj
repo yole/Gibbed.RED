@@ -1,0 +1,177 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B167294C-8BD0-4165-B06F-42F876BE76E0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Gibbed.RED.FileFormats</RootNamespace>
+    <AssemblyName>Gibbed.RED.FileFormats</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CompiledScriptsFile.cs" />
+    <Compile Include="Game\Box.cs" />
+    <Compile Include="Game\CActor.cs" />
+    <Compile Include="Game\CBitmapTexture.cs" />
+    <Compile Include="Game\CCharacterStats.cs" />
+    <Compile Include="Game\CColorShift.cs" />
+    <Compile Include="Game\CComponentReference.cs" />
+    <Compile Include="Game\CEntity.cs" />
+    <Compile Include="Game\CEntityAppearance.cs" />
+    <Compile Include="Game\CEntityBodyPart.cs" />
+    <Compile Include="Game\CEntityBodyPartState.cs" />
+    <Compile Include="Game\CEntityColorVariant.cs" />
+    <Compile Include="Game\CEntityTemplate.cs" />
+    <Compile Include="Game\CGameplayEntity.cs" />
+    <Compile Include="Game\CMaterialGraph.cs" />
+    <Compile Include="Game\CMesh.cs" />
+    <Compile Include="Game\CNewNPC.cs" />
+    <Compile Include="Game\CNode.cs" />
+    <Compile Include="Game\CObject.cs" />
+    <Compile Include="Game\Color.cs" />
+    <Compile Include="Game\CParticleDrawerScreen.cs" />
+    <Compile Include="Game\CParticleEmitter.cs" />
+    <Compile Include="Game\CParticleSystem.cs" />
+    <Compile Include="Game\CPeristentEntity.cs" />
+    <Compile Include="Game\CResource.cs" />
+    <Compile Include="Game\CStateMachine.cs" />
+    <Compile Include="Game\EAIAttitude.cs" />
+    <Compile Include="Game\EDicePokerLevel.cs" />
+    <Compile Include="Game\EEnvColorGroup.cs" />
+    <Compile Include="Game\EngineTransform.cs" />
+    <Compile Include="Game\EntitySlot.cs" />
+    <Compile Include="Game\ERenderingSortGroup.cs" />
+    <Compile Include="Game\ETextureCompression.cs" />
+    <Compile Include="Game\ETextureRawFormat.cs" />
+    <Compile Include="Game\GameTime.cs" />
+    <Compile Include="Game\ProbablyMatrix4x4.cs" />
+    <Compile Include="Game\Script\CContainer.cs" />
+    <Compile Include="Game\TTypedClass.cs" />
+    <Compile Include="IFileStream.cs" />
+    <Compile Include="IFileObject.cs" />
+    <Compile Include="ResourceHandlerAttribute.cs" />
+    <Compile Include="Resource\Dummy.cs" />
+    <Compile Include="Resource\Link.cs" />
+    <Compile Include="Resource\Info.cs" />
+    <Compile Include="Resource\ResourceReader.cs" />
+    <Compile Include="Save\IdTagManager.cs" />
+    <Compile Include="Save\Quest.cs" />
+    <Compile Include="Save\QuestBlock.cs" />
+    <Compile Include="Save\QuestData.cs" />
+    <Compile Include="Save\QuestExternalScenePlayer.cs" />
+    <Compile Include="Save\QuestSystem.cs" />
+    <Compile Include="Script\ArrayDefinition.cs" />
+    <Compile Include="Script\BitFieldDefinition.cs" />
+    <Compile Include="Script\ClassDefinition.cs" />
+    <Compile Include="Script\EnumDefinition.cs" />
+    <Compile Include="Script\HandleDefinition.cs" />
+    <Compile Include="Script\PointerDefinition.cs" />
+    <Compile Include="Script\PropertyDefault.cs" />
+    <Compile Include="Script\PropertyDefinition.cs" />
+    <Compile Include="Script\SoftHandleDefinition.cs" />
+    <Compile Include="Script\SimpleDefinition.cs" />
+    <Compile Include="Script\TypeDefinition.cs" />
+    <Compile Include="SerializeMode.cs" />
+    <Compile Include="Serializers\ArraySerializer.cs" />
+    <Compile Include="Serializers\BoolSerializer.cs" />
+    <Compile Include="Serializers\CNameSerializer.cs" />
+    <Compile Include="Serializers\EngineTransformSerializer.cs" />
+    <Compile Include="Serializers\GuidSerializer.cs" />
+    <Compile Include="Serializers\Int8Serializer.cs" />
+    <Compile Include="Serializers\ClassSerializer.cs" />
+    <Compile Include="Serializers\EnumSerializer.cs" />
+    <Compile Include="Serializers\FloatSerializer.cs" />
+    <Compile Include="Serializers\IntSerializer.cs" />
+    <Compile Include="Serializers\LocalizedStringSerializer.cs" />
+    <Compile Include="Serializers\PointerSerializer.cs" />
+    <Compile Include="Serializers\StringSerializer.cs" />
+    <Compile Include="Serializers\StructureSerializer.cs" />
+    <Compile Include="Serializers\TagListSerializer.cs" />
+    <Compile Include="Serializers\Uint16Serializer.cs" />
+    <Compile Include="Serializers\Uint8Serializer.cs" />
+    <Compile Include="Serializers\UintSerializer.cs" />
+    <Compile Include="PropertySerializer.cs" />
+    <Compile Include="Game\Vector.cs" />
+    <Compile Include="Game\VoicetagAppearancePair.cs" />
+    <Compile Include="ResourceFile.cs" />
+    <Compile Include="Resource\LinkInfo.cs" />
+    <Compile Include="IPropertySerializer.cs" />
+    <Compile Include="Resource\ObjectInfo.cs" />
+    <Compile Include="PropertyDescriptionAttribute.cs" />
+    <Compile Include="PropertyNameAttribute.cs" />
+    <Compile Include="PropertySerializerAttribute.cs" />
+    <Compile Include="SaveFile.cs" />
+    <Compile Include="Save\ISaveBlock.cs" />
+    <Compile Include="Save\ISaveStream.cs" />
+    <Compile Include="Save\SaveInfo.cs" />
+    <Compile Include="Save\SaveReader.cs" />
+    <Compile Include="Save\TimeInfo.cs" />
+    <Compile Include="Save\TimeManager.cs" />
+    <Compile Include="Script\ArgumentDefinition.cs" />
+    <Compile Include="Script\FunctionDefinition.cs" />
+    <Compile Include="Script\FunctionFlags.cs" />
+    <Compile Include="Script\ICodeReader.cs" />
+    <Compile Include="Script\ICodeWriter.cs" />
+    <Compile Include="Script\Instructions\U04.cs" />
+    <Compile Include="Script\IInstruction.cs" />
+    <Compile Include="Script\Opcode.cs" />
+    <Compile Include="Script\OpcodeHandlerAttribute.cs" />
+    <Compile Include="Script\OpcodeHandlerCache.cs" />
+    <Compile Include="Script\RawFunctionDefinition.cs" />
+    <Compile Include="Script\RawString.cs" />
+    <Compile Include="Script\RawTypeDefinition.cs" />
+    <Compile Include="Script\TypeDefinitionFlags.cs" />
+    <Compile Include="Script\NativeType.cs" />
+    <Compile Include="PackageFile.cs" />
+    <Compile Include="Package\Entry.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StreamHelpers.cs" />
+    <Compile Include="StringsFile.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Gibbed.Helpers\Gibbed.Helpers.csproj">
+      <Project>{5162A9FB-4DE1-4BBF-B7A2-5E8116AB0D26}</Project>
+      <Name>Gibbed.Helpers</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
