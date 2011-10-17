@@ -20,11 +20,13 @@
  *    distribution.
  */
 
+using System.IO;
+
 namespace Gibbed.RED.FileFormats.Script
 {
     public interface IInstruction
     {
-        void Deserialize(ICodeReader input);
+        int Deserialize(Stream input);
         void Serialize(ICodeWriter output);
     }
 }

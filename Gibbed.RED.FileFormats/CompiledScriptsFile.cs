@@ -21,8 +21,11 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Gibbed.Helpers;
+using Gibbed.RED.FileFormats.Script;
+using Gibbed.RED.FileFormats.Script.Instructions;
 
 namespace Gibbed.RED.FileFormats
 {
@@ -34,6 +37,7 @@ namespace Gibbed.RED.FileFormats
 
         public Script.TypeDefinition[] TypeDefs;
         public Script.FunctionDefinition[] FuncDefs;
+        private RawString[] _strings;
 
         public void Deserialize(Stream input)
         {
@@ -43,13 +47,13 @@ namespace Gibbed.RED.FileFormats
             var stringTableOffset = input.ReadValueU32();
             input.Seek(stringTableOffset, SeekOrigin.Begin);
             var stringCount = input.ReadValueU32();
-            var strings = new Script.RawString[stringCount];
-            for (int i = 0; i < strings.Length; i++)
+            _strings = new Script.RawString[stringCount];
+            for (int i = 0; i < _strings.Length; i++)
             {
                 var stringEntry = new Script.RawString();
                 stringEntry.Value = input.ReadEncodedString();
                 stringEntry.IsName = input.ReadValueB8();
-                strings[i] = stringEntry;
+                _strings[i] = stringEntry;
             }
 
             input.Seek(0, SeekOrigin.Begin);
@@ -68,7 +72,7 @@ namespace Gibbed.RED.FileFormats
             for (uint i = 0; i < typeDefCount; i++)
             {
                 var rawTypeDef = new Script.RawTypeDefinition();
-                rawTypeDef.Name = strings[input.ReadValueEncodedS32()].Value;
+                rawTypeDef.Name = _strings[input.ReadValueEncodedS32()].Value;
                 rawTypeDef.Type = (Script.NativeType)input.ReadValueEncodedS32();
                 rawTypeDef.NativePropertyCount = input.ReadValueEncodedS32();
                 rawTypeDef.ScriptedPropertyCount = input.ReadValueEncodedS32();
@@ -230,7 +234,7 @@ namespace Gibbed.RED.FileFormats
             for (uint i = 0; i < funcDefCount; i++)
             {
                 var rawFuncDef = new Script.RawFunctionDefinition();
-                rawFuncDef.Name = strings[input.ReadValueEncodedS32()].Value;
+                rawFuncDef.Name = _strings[input.ReadValueEncodedS32()].Value;
                 rawFuncDef.DefinedOnId = input.ReadValueEncodedS32();
                 rawFuncDef.Flags = input.ReadValueEncodedS32();
 
@@ -283,7 +287,7 @@ namespace Gibbed.RED.FileFormats
                 typeDef.Constants.Clear();
                 for (int j = 0; j < constantCount; j++)
                 {
-                    var constantName = strings[input.ReadValueEncodedS32()].Value;
+                    var constantName = _strings[input.ReadValueEncodedS32()].Value;
                     var constantValue = input.ReadValueEncodedS32();
                     typeDef.Constants.Add(constantName, constantValue);
                 }
@@ -330,7 +334,7 @@ namespace Gibbed.RED.FileFormats
                 typeDef.States.Clear();
                 for (int j = 0; j < stateCount; j++)
                 {
-                    var stateName = strings[input.ReadValueEncodedS32()].Value;
+                    var stateName = _strings[input.ReadValueEncodedS32()].Value;
                     var stateTypeId = input.ReadValueEncodedS32();
                     var stateDef = (Script.ClassDefinition)TypeDefs[stateTypeId];
                     typeDef.States.Add(stateName, stateDef);
@@ -339,7 +343,7 @@ namespace Gibbed.RED.FileFormats
                 typeDef.NativeProperties.Clear();
                 for (int j = 0; j < rawTypeDef.NativePropertyCount; j++)
                 {
-                    var nativePropertyName = strings[input.ReadValueEncodedS32()].Value;
+                    var nativePropertyName = _strings[input.ReadValueEncodedS32()].Value;
                     typeDef.NativeProperties.Add(nativePropertyName);
                 }
 
@@ -347,7 +351,7 @@ namespace Gibbed.RED.FileFormats
                 for (int j = 0; j < rawTypeDef.ScriptedPropertyCount; j++)
                 {
                     var propTypeId = input.ReadValueEncodedS32();
-                    var propName = strings[input.ReadValueEncodedS32()].Value;
+                    var propName = _strings[input.ReadValueEncodedS32()].Value;
                     var propFlags = input.ReadValueEncodedS32();
 
                     var property = new Script.PropertyDefinition()
@@ -391,7 +395,7 @@ namespace Gibbed.RED.FileFormats
                 var defaultCount = input.ReadValueEncodedS32();
                 for (int j = 0; j < defaultCount; j++)
                 {
-                    var propName = strings[input.ReadValueEncodedS32()].Value;
+                    var propName = _strings[input.ReadValueEncodedS32()].Value;
 
                     var dataType = input.ReadValueEncodedS32();
                     if (dataType == 0 || dataType == 1)
@@ -444,7 +448,7 @@ namespace Gibbed.RED.FileFormats
                 for (int j = 0; j < argumentCount; j++)
                 {
                     var argumentTypeId = input.ReadValueEncodedS32();
-                    var argumentName = strings[input.ReadValueEncodedS32()];
+                    var argumentName = _strings[input.ReadValueEncodedS32()];
                     var argumentFlags = input.ReadValueEncodedS32();
                 }
 
@@ -452,201 +456,223 @@ namespace Gibbed.RED.FileFormats
                 for (int j = 0; j < localCount; j++)
                 {
                     var localTypeId = input.ReadValueEncodedS32();
-                    var localName = strings[input.ReadValueEncodedS32()];
+                    var localName = _strings[input.ReadValueEncodedS32()];
                 }
 
                 if ((flags & Script.FunctionFlags.Import) == 0)
                 {
-                    var unencodedByteCodeLength = input.ReadValueEncodedS32();
-                    int read;
-                    for (read = 0; read < unencodedByteCodeLength; )
-                    {
-                        var op = input.ReadValueU8();
-                        var opcode = (Script.Opcode)op;
-                        read++;
-
-                        switch (opcode)
-                        {
-                            case Script.Opcode.OP_Target:
-                            {
-                                var op_0 = input.ReadValueEncodedS32(); read += 4;
-                                var op_1 = input.ReadValueU8(); read++;
-                                break;
-                            }
-
-                            case Script.Opcode.OP_ShortConst:
-                            {
-                                var op_0 = input.ReadValueS16(); read += 2;
-                                break;
-                            }
-
-                            case Script.Opcode.OP_IntConst:
-                            {
-                                var op_0 = input.ReadValueEncodedS32(); read += 4;
-                                break;
-                            }
-
-                            case Script.Opcode.OP_FloatConst:
-                            {
-                                var op_0 = input.ReadValueF32(); read += 4;
-                                break;
-                            }
-
-                            case Script.Opcode.OP_StringConst:
-                            {
-                                var op_0 = input.ReadValueEncodedS32(); read += 16;
-                                break;
-                            }
-
-                            case Script.Opcode.OP_Return:
-                            {
-                                var op_0 = input.ReadValueU16(); read += 2;
-                                var op_1 = input.ReadValueU16(); read += 2;
-                                var op_2 = input.ReadValueEncodedS32(); read += 4;
-                                break;
-                            }
-
-                            case Script.Opcode.OP_TestNotEqual:
-                            case Script.Opcode.OP_Jump:
-                            {
-                                var op_0 = input.ReadValueU16(); read += 2;
-                                var op_1 = input.ReadValueU16(); read += 2;
-                                break;
-                            }
-
-                            case Script.Opcode.OP_LocalVar:
-                            case Script.Opcode.OP_Conditional:
-                            case Script.Opcode.OP_Skip:
-                            case Script.Opcode.OP_Constructor:
-                            {
-                                var op_0 = input.ReadValueU16(); read += 2;
-                                break;
-                            }
-
-                            case Script.Opcode.OP_DefaultVar:
-                            case Script.Opcode.OP_ObjectVar:
-                            case Script.Opcode.OP_Switch:
-                            case Script.Opcode.OP_TestEqual:
-                            {
-                                var op_0 = input.ReadValueEncodedS32();
-                                var op_1 = input.ReadValueEncodedS32();
-                                read += 4;
-                                break;
-                            }
-
-                            case Script.Opcode.OP_SwitchDefault:
-                            {
-                                var op_0 = input.ReadValueEncodedS32(); read += 4;
-                                var op_1 = input.ReadValueU16(); read += 2;
-                                break;
-                            }
-
-                            case Script.Opcode.OP_VirtualFunc:
-                            {
-                                var op_0 = input.ReadValueU8(); read++;
-                                var op_1 = input.ReadValueEncodedS32(); read += 4;
-                                break;
-                            }
-
-                            case Script.Opcode.OP_New:
-                            case Script.Opcode.OP_ArrayElement:
-                            case Script.Opcode.OP_NameConst:
-                            case Script.Opcode.OP_IntToFloat:
-                            case Script.Opcode.OP_BoolToFloat:
-                            case Script.Opcode.OP_StringToBool:
-                            case Script.Opcode.OP_This:
-                            case Script.Opcode.OP_BoolToInt:
-                            case Script.Opcode.OP_EntryFunc:
-                            case Script.Opcode.OP_IntToByte:
-                            case Script.Opcode.OP_FloatToInt:
-                            case Script.Opcode.OP_Delete:
-                            case Script.Opcode.OP_NameToBool:
-                            case Script.Opcode.OP_ArrayLast:
-                            case Script.Opcode.OP_IntToBool:
-                            case Script.Opcode.OP_BoolToString:
-                            case Script.Opcode.OP_FloatToBool:
-                            case Script.Opcode.OP_FloatToString:
-                            case Script.Opcode.OP_ByteToInt:
-                            case Script.Opcode.OP_NameToString:
-                            case Script.Opcode.OP_FloatToByte:
-                            case Script.Opcode.OP_Breakpoint:
-                            {
-                                var op_0 = input.ReadValueEncodedS32(); read += 4;
-                                break;
-                            }
-
-                            case Script.Opcode.OP_ParamEnd:
-                            {
-                                var op_0 = input.ReadValueU16(); read += 2;
-                                var op_1 = input.ReadValueU16(); read += 2;
-                                var op_2 = input.ReadValueEncodedS32();
-                                if (op_2 == -1)
-                                {
-                                    var op_3 = input.ReadValueEncodedS32();
-                                }
-                                read += 4;
-                                break;
-                            }
-
-                            case Script.Opcode.OP_StructMember:
-                            case Script.Opcode.OP_SavePointEnd:
-                            {
-                                var op_0 = input.ReadValueU16(); read += 2;
-                                var op_1 = input.ReadValueEncodedS32(); read += 4;
-                                break;
-                            }
-
-                            case Script.Opcode.OP_Nop:
-                            case Script.Opcode.OP_Context:
-                            case Script.Opcode.OP_IntZero:
-                            case Script.Opcode.OP_IntOne:
-                            case Script.Opcode.OP_BoolFalse:
-                            case Script.Opcode.OP_BoolTrue:
-                            case Script.Opcode.OP_Assign:
-                            case Script.Opcode.OP_GetServer:
-                            case Script.Opcode.OP_GetCamera:
-                            case Script.Opcode.OP_ArrayPushBack:
-                            case Script.Opcode.OP_GetPlayer:
-                            case Script.Opcode.OP_ArrayResize:
-                            case Script.Opcode.OP_SavePoint:
-                            case Script.Opcode.OP_Null:
-                            case Script.Opcode.OP_GetGame:
-                            case Script.Opcode.OP_ArrayGrow:
-                            case Script.Opcode.OP_ArrayFindFirst:
-                            case Script.Opcode.OP_ArrayContains:
-                            case Script.Opcode.OP_ArraySize:
-                            case Script.Opcode.OP_ArrayErase:
-                            case Script.Opcode.OP_JumpIfFalse:
-                            case Script.Opcode.OP_ObjectToBool:
-                            case Script.Opcode.OP_GetHud:
-                            case Script.Opcode.OP_ArrayFindLastFast:
-                            case Script.Opcode.OP_ArrayContainsFast:
-                            case Script.Opcode.OP_SaveValue:
-                            case Script.Opcode.OP_ArrayClear:
-                            case Script.Opcode.OP_EnumToString:
-                            case Script.Opcode.OP_ArrayFindFirstFast:
-                            case Script.Opcode.OP_EnumToInt:
-                            case Script.Opcode.OP_ArrayPopBack:
-                            case Script.Opcode.OP_BoolToByte:
-                            case Script.Opcode.OP_ArrayRemove:
-                            case Script.Opcode.OP_GetSound:
-                            {
-                                break;
-                            }
-
-                            default:
-                            {
-                                throw new NotImplementedException("unhandled " + opcode.ToString());
-                            }
-                        }
-                    }
-
-                    if (read != unencodedByteCodeLength)
-                    {
-                        throw new InvalidOperationException();
-                    }
+                    FuncDefs [i].Instructions = ReadBytecode(input);
                 }
             }
+        }
+
+        private List<Script.IInstruction> ReadBytecode(Stream input)
+        {
+            var unencodedByteCodeLength = input.ReadValueEncodedS32();
+            int read;
+            var result = new List<Script.IInstruction>();
+            for (read = 0; read < unencodedByteCodeLength;)
+            {
+                var op = input.ReadValueU8();
+                var opcode = (Script.Opcode) op;
+                read++;
+                Script.IInstruction instruction = null;
+
+                switch (opcode)
+                {
+                    case Script.Opcode.OP_Target:
+                        {
+                            instruction = new Target();
+                            break;
+                        }
+
+                    case Script.Opcode.OP_ShortConst:
+                        {
+                            instruction = new ShortConst();
+                            break;
+                        }
+
+                    case Script.Opcode.OP_IntConst:
+                        {
+                            instruction = new IntConst();
+                            break;
+                        }
+
+                    case Script.Opcode.OP_FloatConst:
+                        {
+                            instruction = new FloatConst();
+                            break;
+                        }
+
+                    case Script.Opcode.OP_StringConst:
+                        {
+                            var op_0 = input.ReadValueEncodedS32();
+                            read += 16;
+                            break;
+                        }
+
+                    case Script.Opcode.OP_Return:
+                        {
+                            instruction = new Return();
+                            break;
+                        }
+
+                    case Script.Opcode.OP_TestNotEqual:
+                    case Script.Opcode.OP_Jump:
+                        {
+                            var op_0 = input.ReadValueU16();
+                            read += 2;
+                            var op_1 = input.ReadValueU16();
+                            read += 2;
+                            break;
+                        }
+
+                    case Script.Opcode.OP_LocalVar:
+                    case Script.Opcode.OP_Conditional:
+                    case Script.Opcode.OP_Skip:
+                    case Script.Opcode.OP_Constructor:
+                        {
+                            instruction = new U16(opcode);
+                            break;
+                        }
+
+                    case Script.Opcode.OP_DefaultVar:
+                    case Script.Opcode.OP_ObjectVar:
+                    case Script.Opcode.OP_Switch:
+                    case Script.Opcode.OP_TestEqual:
+                        {
+                            instruction = new S32S32(opcode);
+                            break;
+                        }
+
+                    case Script.Opcode.OP_SwitchDefault:
+                        {
+                            var op_0 = input.ReadValueEncodedS32();
+                            read += 4;
+                            var op_1 = input.ReadValueU16();
+                            read += 2;
+                            break;
+                        }
+
+                    case Script.Opcode.OP_VirtualFunc:
+                        {
+                            instruction = new VirtualFunc();
+                            break;
+                        }
+
+                    case Script.Opcode.OP_New:
+                    case Script.Opcode.OP_ArrayElement:
+                    case Script.Opcode.OP_IntToFloat:
+                    case Script.Opcode.OP_BoolToFloat:
+                    case Script.Opcode.OP_StringToBool:
+                    case Script.Opcode.OP_This:
+                    case Script.Opcode.OP_BoolToInt:
+                    case Script.Opcode.OP_EntryFunc:
+                    case Script.Opcode.OP_IntToByte:
+                    case Script.Opcode.OP_FloatToInt:
+                    case Script.Opcode.OP_Delete:
+                    case Script.Opcode.OP_NameToBool:
+                    case Script.Opcode.OP_ArrayLast:
+                    case Script.Opcode.OP_IntToBool:
+                    case Script.Opcode.OP_BoolToString:
+                    case Script.Opcode.OP_FloatToBool:
+                    case Script.Opcode.OP_FloatToString:
+                    case Script.Opcode.OP_ByteToInt:
+                    case Script.Opcode.OP_NameToString:
+                    case Script.Opcode.OP_FloatToByte:
+                    case Script.Opcode.OP_Breakpoint:
+                        {
+                            instruction = new S32(opcode);
+                            break;
+                        }
+
+                    case Script.Opcode.OP_NameConst:
+                        {
+                            instruction = new NameConst(_strings);
+                            break;
+                        }
+
+                    case Script.Opcode.OP_ParamEnd:
+                        {
+                            var op_0 = input.ReadValueU16();
+                            read += 2;
+                            var op_1 = input.ReadValueU16();
+                            read += 2;
+                            var op_2 = input.ReadValueEncodedS32();
+                            if (op_2 == -1)
+                            {
+                                var op_3 = input.ReadValueEncodedS32();
+                            }
+                            read += 4;
+                            break;
+                        }
+
+                    case Script.Opcode.OP_StructMember:
+                    case Script.Opcode.OP_SavePointEnd:
+                        {
+                            var op_0 = input.ReadValueU16();
+                            read += 2;
+                            var op_1 = input.ReadValueEncodedS32();
+                            read += 4;
+                            break;
+                        }
+
+                    case Script.Opcode.OP_Nop:
+                    case Script.Opcode.OP_Context:
+                    case Script.Opcode.OP_IntZero:
+                    case Script.Opcode.OP_IntOne:
+                    case Script.Opcode.OP_BoolFalse:
+                    case Script.Opcode.OP_BoolTrue:
+                    case Script.Opcode.OP_Assign:
+                    case Script.Opcode.OP_GetServer:
+                    case Script.Opcode.OP_GetCamera:
+                    case Script.Opcode.OP_ArrayPushBack:
+                    case Script.Opcode.OP_GetPlayer:
+                    case Script.Opcode.OP_ArrayResize:
+                    case Script.Opcode.OP_SavePoint:
+                    case Script.Opcode.OP_Null:
+                    case Script.Opcode.OP_GetGame:
+                    case Script.Opcode.OP_ArrayGrow:
+                    case Script.Opcode.OP_ArrayFindFirst:
+                    case Script.Opcode.OP_ArrayContains:
+                    case Script.Opcode.OP_ArraySize:
+                    case Script.Opcode.OP_ArrayErase:
+                    case Script.Opcode.OP_JumpIfFalse:
+                    case Script.Opcode.OP_ObjectToBool:
+                    case Script.Opcode.OP_GetHud:
+                    case Script.Opcode.OP_ArrayFindLastFast:
+                    case Script.Opcode.OP_ArrayContainsFast:
+                    case Script.Opcode.OP_SaveValue:
+                    case Script.Opcode.OP_ArrayClear:
+                    case Script.Opcode.OP_EnumToString:
+                    case Script.Opcode.OP_ArrayFindFirstFast:
+                    case Script.Opcode.OP_EnumToInt:
+                    case Script.Opcode.OP_ArrayPopBack:
+                    case Script.Opcode.OP_BoolToByte:
+                    case Script.Opcode.OP_ArrayRemove:
+                    case Script.Opcode.OP_GetSound:
+                        {
+                            instruction = new Simple(opcode);
+                            break;
+                        }
+
+                    default:
+                        {
+                            throw new NotImplementedException("unhandled " + opcode.ToString());
+                        }
+                }
+                if (instruction != null)
+                {
+                    read += instruction.Deserialize(input);
+                }
+                result.Add(instruction);
+            }
+
+            if (read != unencodedByteCodeLength)
+            {
+                throw new InvalidOperationException();
+            }
+            return result;
         }
     }
 }

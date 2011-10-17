@@ -96,6 +96,16 @@
     <Compile Include="Script\ClassDefinition.cs" />
     <Compile Include="Script\EnumDefinition.cs" />
     <Compile Include="Script\HandleDefinition.cs" />
+    <Compile Include="Script\Instructions\FloatConst.cs" />
+    <Compile Include="Script\Instructions\NameConst.cs" />
+    <Compile Include="Script\Instructions\Return.cs" />
+    <Compile Include="Script\Instructions\S32.cs" />
+    <Compile Include="Script\Instructions\S32S32.cs" />
+    <Compile Include="Script\Instructions\ShortConst.cs" />
+    <Compile Include="Script\Instructions\Simple.cs" />
+    <Compile Include="Script\Instructions\Target.cs" />
+    <Compile Include="Script\Instructions\U16.cs" />
+    <Compile Include="Script\Instructions\VirtualFunc.cs" />
     <Compile Include="Script\PointerDefinition.cs" />
     <Compile Include="Script\PropertyDefault.cs" />
     <Compile Include="Script\PropertyDefinition.cs" />

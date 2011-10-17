@@ -51,9 +51,15 @@ namespace Gibbed.RED.Test
                 Console.WriteLine("\n\nFUNCTIONS:");
                 foreach (var funcDef in test.FuncDefs)
                 {
-                    Console.WriteLine(funcDef.Name); 
+                    Console.WriteLine(funcDef.Name);
+                    if (funcDef.Instructions != null)
+                    {
+                        foreach (var instruction in funcDef.Instructions)
+                        {
+                            Console.WriteLine("    " + (instruction == null ? "?" : instruction.ToString()));
+                        }
+                    }
                 }
-
             }
         }
     }

@@ -21,20 +21,29 @@
  */
 
 using System;
+using System.IO;
 
 namespace Gibbed.RED.FileFormats.Script.Instructions
 {
     [OpcodeHandler(Opcode.OP_IntConst)]
     public class IntConst : IInstruction
     {
-        public void Deserialize(ICodeReader input)
+        private int _value;
+
+        public int Deserialize(Stream input)
         {
-            throw new NotImplementedException();
+            _value = input.ReadValueEncodedS32();
+            return 4;
         }
 
         public void Serialize(ICodeWriter output)
         {
             throw new NotImplementedException();
+        }
+
+        public override string ToString()
+        {
+            return "IntConst: " + _value;
         }
     }
 }
