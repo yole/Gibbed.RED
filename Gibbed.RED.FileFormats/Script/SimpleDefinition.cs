@@ -24,5 +24,9 @@ namespace Gibbed.RED.FileFormats.Script
 {
     public class SimpleDefinition : TypeDefinition
     {
+        public override string ToString()
+        {
+            return "SimpleDefinition: " + Name;
+        }
     }
 }

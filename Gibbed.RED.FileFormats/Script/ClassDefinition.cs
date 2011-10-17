@@ -37,5 +37,10 @@ namespace Gibbed.RED.FileFormats.Script
             = new Dictionary<string, PropertyDefault>();
         public Dictionary<string, FunctionDefinition> Functions
             = new Dictionary<string, FunctionDefinition>();
+
+        public override string ToString()
+        {
+            return "Class: " + Name;
+        }
     }
 }

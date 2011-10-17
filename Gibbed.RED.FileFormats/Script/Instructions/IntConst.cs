@@ -24,8 +24,8 @@ using System;
 
 namespace Gibbed.RED.FileFormats.Script.Instructions
 {
-    [OpcodeHandler(Opcode.U04)]
-    public class U04 : IInstruction
+    [OpcodeHandler(Opcode.OP_IntConst)]
+    public class IntConst : IInstruction
     {
         public void Deserialize(ICodeReader input)
         {

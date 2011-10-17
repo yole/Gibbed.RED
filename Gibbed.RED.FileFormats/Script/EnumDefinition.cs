@@ -29,5 +29,10 @@ namespace Gibbed.RED.FileFormats.Script
         public int Unknown0;
         public Dictionary<string, int> Constants
             = new Dictionary<string, int>();
+
+        public override string ToString()
+        {
+            return "EnumDefinition: " + Name;
+        }
     }
 }

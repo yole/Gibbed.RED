@@ -143,7 +143,7 @@
     <Compile Include="Script\FunctionFlags.cs" />
     <Compile Include="Script\ICodeReader.cs" />
     <Compile Include="Script\ICodeWriter.cs" />
-    <Compile Include="Script\Instructions\U04.cs" />
+    <Compile Include="Script\Instructions\IntConst.cs" />
     <Compile Include="Script\IInstruction.cs" />
     <Compile Include="Script\Opcode.cs" />
     <Compile Include="Script\OpcodeHandlerAttribute.cs" />

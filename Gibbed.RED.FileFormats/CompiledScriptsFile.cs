@@ -32,6 +32,9 @@ namespace Gibbed.RED.FileFormats
         public DateTime TimeStamp;
         public string Unknown2;
 
+        public Script.TypeDefinition[] TypeDefs;
+        public Script.FunctionDefinition[] FuncDefs;
+
         public void Deserialize(Stream input)
         {
             input.Seek(-4, SeekOrigin.End);
@@ -60,7 +63,7 @@ namespace Gibbed.RED.FileFormats
             var funcDefCount = input.ReadValueU32();
 
             var rawTypeDefs = new Script.RawTypeDefinition[typeDefCount];
-            var typeDefs = new Script.TypeDefinition[typeDefCount];
+            TypeDefs = new Script.TypeDefinition[typeDefCount];
 
             for (uint i = 0; i < typeDefCount; i++)
             {
@@ -218,11 +221,11 @@ namespace Gibbed.RED.FileFormats
                     throw new FormatException();
                 }
 
-                typeDefs[i] = typeDef;
+                TypeDefs[i] = typeDef;
             }
 
             var rawFuncDefs = new Script.RawFunctionDefinition[funcDefCount];
-            var funcDefs = new Script.FunctionDefinition[funcDefCount];
+            FuncDefs = new Script.FunctionDefinition[funcDefCount];
 
             for (uint i = 0; i < funcDefCount; i++)
             {
@@ -232,13 +235,18 @@ namespace Gibbed.RED.FileFormats
                 rawFuncDef.Flags = input.ReadValueEncodedS32();
 
                 var funcDef = new Script.FunctionDefinition();
+                funcDef.Name = rawFuncDef.Name;
 
-                if (rawFuncDef.DefinedOnId == 0)
+                if (rawFuncDef.DefinedOnId != 0)
                 {
+                    var typeDef = TypeDefs[rawFuncDef.DefinedOnId] as Script.ClassDefinition;
+                    if (typeDef == null)
+                        throw new FormatException("expected ClassDefinition, found " + TypeDefs[rawFuncDef.DefinedOnId]);
+                    typeDef.Functions[funcDef.Name] = funcDef;
                 }
 
                 rawFuncDefs[i] = rawFuncDef;
-                funcDefs[i] = funcDef;
+                FuncDefs[i] = funcDef;
             }
 
             // parse enums
@@ -268,7 +276,7 @@ namespace Gibbed.RED.FileFormats
                     throw new FormatException();
                 }
 
-                var typeDef = (Script.EnumDefinition)typeDefs[i];
+                var typeDef = (Script.EnumDefinition)TypeDefs[i];
                 typeDef.Unknown0 = input.ReadValueEncodedS32();
                 
                 var constantCount = input.ReadValueEncodedS32();
@@ -308,13 +316,13 @@ namespace Gibbed.RED.FileFormats
                     throw new FormatException();
                 }
 
-                var typeDef = (Script.ClassDefinition)typeDefs[i];
+                var typeDef = (Script.ClassDefinition)TypeDefs[i];
 
                 var isExtending = input.ReadValueEncodedS32();
                 if (isExtending != 0)
                 {
                     var superTypeId = input.ReadValueEncodedS32();
-                    var superDef = (Script.ClassDefinition)typeDefs[superTypeId];
+                    var superDef = (Script.ClassDefinition)TypeDefs[superTypeId];
                     typeDef.Super = superDef;
                 }
 
@@ -324,7 +332,7 @@ namespace Gibbed.RED.FileFormats
                 {
                     var stateName = strings[input.ReadValueEncodedS32()].Value;
                     var stateTypeId = input.ReadValueEncodedS32();
-                    var stateDef = (Script.ClassDefinition)typeDefs[stateTypeId];
+                    var stateDef = (Script.ClassDefinition)TypeDefs[stateTypeId];
                     typeDef.States.Add(stateName, stateDef);
                 }
 
@@ -345,7 +353,7 @@ namespace Gibbed.RED.FileFormats
                     var property = new Script.PropertyDefinition()
                     {
                         Flags = propFlags,
-                        TypeDefinition = typeDefs[propTypeId],
+                        TypeDefinition = TypeDefs[propTypeId],
                     };
 
                     typeDef.Properties.Add(propName, property);
@@ -378,7 +386,7 @@ namespace Gibbed.RED.FileFormats
                     throw new FormatException();
                 }
 
-                var typeDef = (Script.ClassDefinition)typeDefs[i];
+                var typeDef = (Script.ClassDefinition)TypeDefs[i];
 
                 var defaultCount = input.ReadValueEncodedS32();
                 for (int j = 0; j < defaultCount; j++)
@@ -459,38 +467,38 @@ namespace Gibbed.RED.FileFormats
 
                         switch (opcode)
                         {
-                            case Script.Opcode.U12:
+                            case Script.Opcode.OP_Target:
                             {
                                 var op_0 = input.ReadValueEncodedS32(); read += 4;
                                 var op_1 = input.ReadValueU8(); read++;
                                 break;
                             }
 
-                            case Script.Opcode.U05:
+                            case Script.Opcode.OP_ShortConst:
                             {
                                 var op_0 = input.ReadValueS16(); read += 2;
                                 break;
                             }
 
-                            case Script.Opcode.U04:
+                            case Script.Opcode.OP_IntConst:
                             {
                                 var op_0 = input.ReadValueEncodedS32(); read += 4;
                                 break;
                             }
 
-                            case Script.Opcode.U06:
+                            case Script.Opcode.OP_FloatConst:
                             {
                                 var op_0 = input.ReadValueF32(); read += 4;
                                 break;
                             }
 
-                            case Script.Opcode.U07:
+                            case Script.Opcode.OP_StringConst:
                             {
                                 var op_0 = input.ReadValueEncodedS32(); read += 16;
                                 break;
                             }
 
-                            case Script.Opcode.U28:
+                            case Script.Opcode.OP_Return:
                             {
                                 var op_0 = input.ReadValueU16(); read += 2;
                                 var op_1 = input.ReadValueU16(); read += 2;
@@ -498,27 +506,27 @@ namespace Gibbed.RED.FileFormats
                                 break;
                             }
 
-                            case Script.Opcode.U33:
-                            case Script.Opcode.U20:
+                            case Script.Opcode.OP_TestNotEqual:
+                            case Script.Opcode.OP_Jump:
                             {
                                 var op_0 = input.ReadValueU16(); read += 2;
                                 var op_1 = input.ReadValueU16(); read += 2;
                                 break;
                             }
 
-                            case Script.Opcode.U13:
-                            case Script.Opcode.U23:
-                            case Script.Opcode.U22:
-                            case Script.Opcode.U24:
+                            case Script.Opcode.OP_LocalVar:
+                            case Script.Opcode.OP_Conditional:
+                            case Script.Opcode.OP_Skip:
+                            case Script.Opcode.OP_Constructor:
                             {
                                 var op_0 = input.ReadValueU16(); read += 2;
                                 break;
                             }
 
-                            case Script.Opcode.U15:
-                            case Script.Opcode.U16:
-                            case Script.Opcode.U17:
-                            case Script.Opcode.U32:
+                            case Script.Opcode.OP_DefaultVar:
+                            case Script.Opcode.OP_ObjectVar:
+                            case Script.Opcode.OP_Switch:
+                            case Script.Opcode.OP_TestEqual:
                             {
                                 var op_0 = input.ReadValueEncodedS32();
                                 var op_1 = input.ReadValueEncodedS32();
@@ -526,48 +534,48 @@ namespace Gibbed.RED.FileFormats
                                 break;
                             }
 
-                            case Script.Opcode.U19:
+                            case Script.Opcode.OP_SwitchDefault:
                             {
                                 var op_0 = input.ReadValueEncodedS32(); read += 4;
                                 var op_1 = input.ReadValueU16(); read += 2;
                                 break;
                             }
 
-                            case Script.Opcode.U26:
+                            case Script.Opcode.OP_VirtualFunc:
                             {
                                 var op_0 = input.ReadValueU8(); read++;
                                 var op_1 = input.ReadValueEncodedS32(); read += 4;
                                 break;
                             }
 
-                            case Script.Opcode.U34:
-                            case Script.Opcode.U86:
-                            case Script.Opcode.U08:
-                            case Script.Opcode.U52:
-                            case Script.Opcode.U44:
-                            case Script.Opcode.U60:
-                            case Script.Opcode.U36:
-                            case Script.Opcode.U43:
-                            case Script.Opcode.U87:
-                            case Script.Opcode.U51:
-                            case Script.Opcode.U56:
-                            case Script.Opcode.U35:
-                            case Script.Opcode.U58:
-                            case Script.Opcode.U85:
-                            case Script.Opcode.U50:
-                            case Script.Opcode.U45:
-                            case Script.Opcode.U54:
-                            case Script.Opcode.U57:
-                            case Script.Opcode.U47:
-                            case Script.Opcode.U59:
-                            case Script.Opcode.U55:
-                            case Script.Opcode.U41:
+                            case Script.Opcode.OP_New:
+                            case Script.Opcode.OP_ArrayElement:
+                            case Script.Opcode.OP_NameConst:
+                            case Script.Opcode.OP_IntToFloat:
+                            case Script.Opcode.OP_BoolToFloat:
+                            case Script.Opcode.OP_StringToBool:
+                            case Script.Opcode.OP_This:
+                            case Script.Opcode.OP_BoolToInt:
+                            case Script.Opcode.OP_EntryFunc:
+                            case Script.Opcode.OP_IntToByte:
+                            case Script.Opcode.OP_FloatToInt:
+                            case Script.Opcode.OP_Delete:
+                            case Script.Opcode.OP_NameToBool:
+                            case Script.Opcode.OP_ArrayLast:
+                            case Script.Opcode.OP_IntToBool:
+                            case Script.Opcode.OP_BoolToString:
+                            case Script.Opcode.OP_FloatToBool:
+                            case Script.Opcode.OP_FloatToString:
+                            case Script.Opcode.OP_ByteToInt:
+                            case Script.Opcode.OP_NameToString:
+                            case Script.Opcode.OP_FloatToByte:
+                            case Script.Opcode.OP_Breakpoint:
                             {
                                 var op_0 = input.ReadValueEncodedS32(); read += 4;
                                 break;
                             }
 
-                            case Script.Opcode.U27:
+                            case Script.Opcode.OP_ParamEnd:
                             {
                                 var op_0 = input.ReadValueU16(); read += 2;
                                 var op_1 = input.ReadValueU16(); read += 2;
@@ -580,47 +588,48 @@ namespace Gibbed.RED.FileFormats
                                 break;
                             }
 
-                            case Script.Opcode.U29:
-                            case Script.Opcode.U40:
+                            case Script.Opcode.OP_StructMember:
+                            case Script.Opcode.OP_SavePointEnd:
                             {
                                 var op_0 = input.ReadValueU16(); read += 2;
                                 var op_1 = input.ReadValueEncodedS32(); read += 4;
                                 break;
                             }
 
-                            case Script.Opcode.U00:
-                            case Script.Opcode.U30:
-                            case Script.Opcode.U03:
-                            case Script.Opcode.U02:
-                            case Script.Opcode.U11:
-                            case Script.Opcode.U10:
-                            case Script.Opcode.U31:
-                            case Script.Opcode.U89:
-                            case Script.Opcode.U91:
-                            case Script.Opcode.U78:
-                            case Script.Opcode.U90:
-                            case Script.Opcode.U71:
-                            case Script.Opcode.U38:
-                            case Script.Opcode.U01:
-                            case Script.Opcode.U88:
-                            case Script.Opcode.U83:
-                            case Script.Opcode.U72:
-                            case Script.Opcode.U76:
-                            case Script.Opcode.U70:
-                            case Script.Opcode.U84:
-                            case Script.Opcode.U21:
-                            case Script.Opcode.U64:
-                            case Script.Opcode.U92:
-                            case Script.Opcode.U75:
-                            case Script.Opcode.U77:
-                            case Script.Opcode.U39:
-                            case Script.Opcode.U69:
-                            case Script.Opcode.U66:
-                            case Script.Opcode.U73:
-                            case Script.Opcode.U67:
-                            case Script.Opcode.U79:
-                            case Script.Opcode.U42:
-                            case Script.Opcode.U81:
+                            case Script.Opcode.OP_Nop:
+                            case Script.Opcode.OP_Context:
+                            case Script.Opcode.OP_IntZero:
+                            case Script.Opcode.OP_IntOne:
+                            case Script.Opcode.OP_BoolFalse:
+                            case Script.Opcode.OP_BoolTrue:
+                            case Script.Opcode.OP_Assign:
+                            case Script.Opcode.OP_GetServer:
+                            case Script.Opcode.OP_GetCamera:
+                            case Script.Opcode.OP_ArrayPushBack:
+                            case Script.Opcode.OP_GetPlayer:
+                            case Script.Opcode.OP_ArrayResize:
+                            case Script.Opcode.OP_SavePoint:
+                            case Script.Opcode.OP_Null:
+                            case Script.Opcode.OP_GetGame:
+                            case Script.Opcode.OP_ArrayGrow:
+                            case Script.Opcode.OP_ArrayFindFirst:
+                            case Script.Opcode.OP_ArrayContains:
+                            case Script.Opcode.OP_ArraySize:
+                            case Script.Opcode.OP_ArrayErase:
+                            case Script.Opcode.OP_JumpIfFalse:
+                            case Script.Opcode.OP_ObjectToBool:
+                            case Script.Opcode.OP_GetHud:
+                            case Script.Opcode.OP_ArrayFindLastFast:
+                            case Script.Opcode.OP_ArrayContainsFast:
+                            case Script.Opcode.OP_SaveValue:
+                            case Script.Opcode.OP_ArrayClear:
+                            case Script.Opcode.OP_EnumToString:
+                            case Script.Opcode.OP_ArrayFindFirstFast:
+                            case Script.Opcode.OP_EnumToInt:
+                            case Script.Opcode.OP_ArrayPopBack:
+                            case Script.Opcode.OP_BoolToByte:
+                            case Script.Opcode.OP_ArrayRemove:
+                            case Script.Opcode.OP_GetSound:
                             {
                                 break;
                             }

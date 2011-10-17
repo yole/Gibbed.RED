@@ -20,6 +20,7 @@
  *    distribution.
  */
 
+using System;
 using System.IO;
 using Gibbed.RED.FileFormats;
 
@@ -29,10 +30,30 @@ namespace Gibbed.RED.Test
     {
         public static void Main(string[] args)
         {
-            using (var input = File.OpenRead(@"T:\Games\Steam\steamapps\common\the witcher 2\CookedPC\compiledscripts.w2scripts"))
+            using (var input = File.OpenRead(@"C:\Program Files (x86)\Steam\steamapps\common\the witcher 2\CookedPC\compiledscripts.w2scripts"))
             {
                 var test = new CompiledScriptsFile();
                 test.Deserialize(input);
+
+                for (int i = 0; i < test.TypeDefs.Length; i++)
+                {
+                    Console.WriteLine(i + ". " + test.TypeDefs[i]);
+                    if (test.TypeDefs[i] is FileFormats.Script.ClassDefinition)
+                    {
+                        var classDef = test.TypeDefs[i] as FileFormats.Script.ClassDefinition;
+                        foreach (var funcDef in classDef.Functions)
+                        {
+                            Console.WriteLine("    " + funcDef.Value.Name);
+                        }
+                    }
+                }
+
+                Console.WriteLine("\n\nFUNCTIONS:");
+                foreach (var funcDef in test.FuncDefs)
+                {
+                    Console.WriteLine(funcDef.Name); 
+                }
+
             }
         }
     }

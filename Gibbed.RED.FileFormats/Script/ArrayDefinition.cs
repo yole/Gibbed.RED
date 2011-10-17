@@ -24,5 +24,9 @@ namespace Gibbed.RED.FileFormats.Script
 {
     public class ArrayDefinition : TypeDefinition
     {
+        public override string ToString()
+        {
+            return "ArrayDefinition: " + Name;
+        }
     }
 }

@@ -24,5 +24,9 @@ namespace Gibbed.RED.FileFormats.Script
 {
     public class BitFieldDefinition : TypeDefinition
     {
+        public override string ToString()
+        {
+            return "BitField: " + Name;
+        }
     }
 }

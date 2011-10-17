@@ -24,5 +24,9 @@ namespace Gibbed.RED.FileFormats.Script
 {
     public class HandleDefinition : TypeDefinition
     {
+        public override string ToString()
+        {
+            return "HandleDefinition: " + Name;
+        }
     }
 }

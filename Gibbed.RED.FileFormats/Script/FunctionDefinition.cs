@@ -29,6 +29,7 @@ namespace Gibbed.RED.FileFormats.Script
         public string Name;
         public TypeDefinition ReturnValue;
         public List<ArgumentDefinition> Arguments;
+        public List<IInstruction> Instructions;
 
     }
 }
