@@ -1,0 +1,9 @@
+Tools for reverse-engineering The Witcher 2: http://www.thewitcher.com/
+ - Archive packing/unpacking
+ - String table dumping
+ - Resource browser
+ - Script decompiler
+
+Originally developed by Rick (rick 'at' gibbed 'dot' us)
+
+Ongoing work by Dmitry Jemerov <intelliyole@gmail.com>
