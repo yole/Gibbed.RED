@@ -21,6 +21,7 @@
  */
 
 using System.Collections.Generic;
+using System.Text;
 
 namespace Gibbed.RED.FileFormats.Script
 {
@@ -28,8 +29,31 @@ namespace Gibbed.RED.FileFormats.Script
     {
         public string Name;
         public TypeDefinition ReturnValue;
-        public List<ArgumentDefinition> Arguments;
+        public readonly List<ArgumentDefinition> Arguments = new List<ArgumentDefinition>();
         public List<IInstruction> Instructions;
 
+        public override string ToString()
+        {
+            var result = new StringBuilder();
+            if (ReturnValue != null)
+            {
+                result.Append(ReturnValue.Name);
+            }
+            else
+            {
+                result.Append("void");
+            }
+            result.Append(" ").Append(Name).Append("(");
+            for (int i = 0; i < Arguments.Count; i++)
+            {
+                if (i > 0)
+                {
+                    result.Append(", ");
+                }
+                result.Append(Arguments[i].Type.Name).Append(" ").Append(Arguments[i].Name);
+            }
+            result.Append(")");
+            return result.ToString();
+        }
     }
 }

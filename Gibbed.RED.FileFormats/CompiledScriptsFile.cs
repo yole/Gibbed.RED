@@ -423,6 +423,7 @@ namespace Gibbed.RED.FileFormats
             for (int i = 0; i < rawFuncDefs.Length; i++)
             {
                 var rawFuncDef = rawFuncDefs[i];
+                var funcDef = FuncDefs [i];
 
                 if ((rawFuncDef.Flags & 1) == 0)
                 {
@@ -442,6 +443,7 @@ namespace Gibbed.RED.FileFormats
                 if (hasReturnValue == true)
                 {
                     var returnValueTypeId = input.ReadValueEncodedS32();
+                    funcDef.ReturnValue = TypeDefs[returnValueTypeId];
                 }
 
                 var argumentCount = input.ReadValueEncodedS32();
@@ -450,6 +452,13 @@ namespace Gibbed.RED.FileFormats
                     var argumentTypeId = input.ReadValueEncodedS32();
                     var argumentName = _strings[input.ReadValueEncodedS32()];
                     var argumentFlags = input.ReadValueEncodedS32();
+
+                    ArgumentDefinition argumentDefinition = new ArgumentDefinition();
+                    argumentDefinition.Name = argumentName.Value;
+                    argumentDefinition.Type = TypeDefs[argumentTypeId];
+                    argumentDefinition.Flags = argumentFlags;
+
+                    funcDef.Arguments.Add(argumentDefinition);
                 }
 
                 var localCount = input.ReadValueEncodedS32();
@@ -461,7 +470,7 @@ namespace Gibbed.RED.FileFormats
 
                 if ((flags & Script.FunctionFlags.Import) == 0)
                 {
-                    FuncDefs [i].Instructions = ReadBytecode(input);
+                    funcDef.Instructions = ReadBytecode(input);
                 }
             }
         }

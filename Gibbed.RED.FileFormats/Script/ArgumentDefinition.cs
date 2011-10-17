@@ -25,7 +25,7 @@ namespace Gibbed.RED.FileFormats.Script
     public class ArgumentDefinition
     {
         public string Name;
-        public int TypeId;
+        public TypeDefinition Type;
         public int Flags;
     }
 }
