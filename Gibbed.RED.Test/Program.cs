@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using Gibbed.RED.FileFormats;
+using Gibbed.RED.FileFormats.Script.Instructions;
 
 namespace Gibbed.RED.Test
 {
@@ -69,9 +70,14 @@ namespace Gibbed.RED.Test
                         {
                             Console.WriteLine();
                         }
-                        foreach (var instruction in funcDef.Instructions)
+                        for (int i = 0; i < funcDef.Instructions.Count; i++)
                         {
-                            Console.WriteLine("    " + (instruction == null ? "?" : instruction.ToString()));
+                            var instruction = funcDef.Instructions[i];
+                            if (instruction is Target)
+                            {
+                                Console.WriteLine("");
+                            }
+                            Console.WriteLine("    {0:D4} {1}", funcDef.InstructionOffsets[i], instruction);
                         }
                         Console.WriteLine("}\n");
                     }

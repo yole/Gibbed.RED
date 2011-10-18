@@ -3,24 +3,22 @@ using Gibbed.Helpers;
 
 namespace Gibbed.RED.FileFormats.Script.Instructions
 {
-    public class VirtualFunc: IInstruction
+    public class Constructor: IInstruction
     {
         private readonly CompiledScriptsFile _scripts;
-        private ushort _opFlags;
-        private ushort _opTargetNum;
-        private int _opFuncName;
+        private byte _op0;
+        private int _opTypeName;
 
-        public VirtualFunc(CompiledScriptsFile scripts)
+        public Constructor(CompiledScriptsFile scripts)
         {
             _scripts = scripts;
         }
 
         public int Deserialize(Stream input)
         {
-            _opFlags = input.ReadValueU16();
-            _opTargetNum = input.ReadValueU16();
-            _opFuncName = input.ReadValueEncodedS32();
-            return 8;
+            _op0 = input.ReadValueU8();
+            _opTypeName = input.ReadValueEncodedS32();
+            return 5;
         }
 
         public void Serialize(ICodeWriter output)
@@ -30,7 +28,7 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return "VirtualFunc(" + _opFlags + "," + _opTargetNum + "," + _scripts.Strings[_opFuncName].Value + ")";
+            return "Constructor(" + _op0 + "," + _scripts.Strings[_opTypeName].Value + ")";
         }
     }
 }

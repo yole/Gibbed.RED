@@ -17,5 +17,10 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
         {
             throw new System.NotImplementedException();
         }
+
+        public override string ToString()
+        {
+            return "ShortConst(" + _value + ")";
+        }
     }
 }

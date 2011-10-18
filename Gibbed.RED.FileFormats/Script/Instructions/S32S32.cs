@@ -5,14 +5,14 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
     class S32S32: IInstruction
     {
         private readonly Opcode _opcode;
-        private readonly RawString[] _strings;
+        private readonly CompiledScriptsFile _scripts;
         private int _op0;
         private int _op1;
 
-        public S32S32(Opcode opcode, RawString[] strings)
+        public S32S32(Opcode opcode, CompiledScriptsFile scripts)
         {
             _opcode = opcode;
-            _strings = strings;
+            _scripts = scripts;
         }
 
         public int Deserialize(Stream input)
@@ -29,7 +29,11 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return _opcode + "(" + _op0 + "," + _op1 + ")    // '" + _strings[_op0].Value + "'";
+            if (_op1 == -1)
+            {
+                return string.Format("{0}('{1}')", _opcode, _scripts.Strings[_op0].Value);
+            }
+            return string.Format("{0}('{1}', {2})", _opcode, _scripts.Strings[_op0].Value, _scripts.TypeDefs[_op1].Name);
         }
     }
 }

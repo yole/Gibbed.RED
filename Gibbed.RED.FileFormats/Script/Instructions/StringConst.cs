@@ -4,7 +4,13 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 {
     public class StringConst: IInstruction
     {
+        private readonly CompiledScriptsFile _scripts;
         private int _op0;
+
+        public StringConst(CompiledScriptsFile scripts)
+        {
+            _scripts = scripts;
+        }
 
         public int Deserialize(Stream input)
         {
@@ -19,7 +25,7 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return "StringConst(" + _op0 + ")";
+            return "StringConst('" + _scripts.Strings[_op0].Value + "')";
         }
     }
 }

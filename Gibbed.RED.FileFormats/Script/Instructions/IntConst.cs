@@ -43,7 +43,7 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return "IntConst: " + _value;
+            return "IntConst(" + _value + ")";
         }
     }
 }

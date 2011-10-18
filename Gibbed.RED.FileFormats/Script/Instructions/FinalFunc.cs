@@ -3,14 +3,15 @@ using Gibbed.Helpers;
 
 namespace Gibbed.RED.FileFormats.Script.Instructions
 {
-    public class VirtualFunc: IInstruction
+    public class FinalFunc: IInstruction
     {
         private readonly CompiledScriptsFile _scripts;
         private ushort _opFlags;
-        private ushort _opTargetNum;
-        private int _opFuncName;
+        private ushort _opTarget;
+        private int _opFuncId;
+        private int _opOperator;
 
-        public VirtualFunc(CompiledScriptsFile scripts)
+        public FinalFunc(CompiledScriptsFile scripts)
         {
             _scripts = scripts;
         }
@@ -18,8 +19,12 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
         public int Deserialize(Stream input)
         {
             _opFlags = input.ReadValueU16();
-            _opTargetNum = input.ReadValueU16();
-            _opFuncName = input.ReadValueEncodedS32();
+            _opTarget = input.ReadValueU16();
+            _opFuncId = input.ReadValueEncodedS32();
+            if (_opFuncId == -1)
+            {
+                _opOperator = input.ReadValueEncodedS32();
+            }
             return 8;
         }
 
@@ -30,7 +35,7 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return "VirtualFunc(" + _opFlags + "," + _opTargetNum + "," + _scripts.Strings[_opFuncName].Value + ")";
+            return "FinalFunc(" + _opFlags + "," + _opTarget + "," + (_opFuncId == -1 ? ((OperatorCode) _opOperator).ToString() : _scripts.FuncDefs[_opFuncId].Name) + ")";
         }
     }
 }

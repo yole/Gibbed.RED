@@ -37,7 +37,7 @@ namespace Gibbed.RED.FileFormats
 
         public Script.TypeDefinition[] TypeDefs;
         public Script.FunctionDefinition[] FuncDefs;
-        private RawString[] _strings;
+        internal RawString[] Strings;
         private RawFunctionDefinition[] _rawFuncDefs;
 
         public void Deserialize(Stream input)
@@ -48,13 +48,13 @@ namespace Gibbed.RED.FileFormats
             var stringTableOffset = input.ReadValueU32();
             input.Seek(stringTableOffset, SeekOrigin.Begin);
             var stringCount = input.ReadValueU32();
-            _strings = new Script.RawString[stringCount];
-            for (int i = 0; i < _strings.Length; i++)
+            Strings = new Script.RawString[stringCount];
+            for (int i = 0; i < Strings.Length; i++)
             {
                 var stringEntry = new Script.RawString();
                 stringEntry.Value = input.ReadEncodedString();
                 stringEntry.IsName = input.ReadValueB8();
-                _strings[i] = stringEntry;
+                Strings[i] = stringEntry;
             }
 
             input.Seek(0, SeekOrigin.Begin);
@@ -73,7 +73,7 @@ namespace Gibbed.RED.FileFormats
             for (uint i = 0; i < typeDefCount; i++)
             {
                 var rawTypeDef = new Script.RawTypeDefinition();
-                rawTypeDef.Name = _strings[input.ReadValueEncodedS32()].Value;
+                rawTypeDef.Name = Strings[input.ReadValueEncodedS32()].Value;
                 rawTypeDef.Type = (Script.NativeType)input.ReadValueEncodedS32();
                 rawTypeDef.NativePropertyCount = input.ReadValueEncodedS32();
                 rawTypeDef.ScriptedPropertyCount = input.ReadValueEncodedS32();
@@ -235,7 +235,7 @@ namespace Gibbed.RED.FileFormats
             for (uint i = 0; i < funcDefCount; i++)
             {
                 var rawFuncDef = new Script.RawFunctionDefinition();
-                rawFuncDef.Name = _strings[input.ReadValueEncodedS32()].Value;
+                rawFuncDef.Name = Strings[input.ReadValueEncodedS32()].Value;
                 rawFuncDef.DefinedOnId = input.ReadValueEncodedS32();
                 rawFuncDef.Flags = input.ReadValueEncodedS32();
 
@@ -289,7 +289,7 @@ namespace Gibbed.RED.FileFormats
                 typeDef.Constants.Clear();
                 for (int j = 0; j < constantCount; j++)
                 {
-                    var constantName = _strings[input.ReadValueEncodedS32()].Value;
+                    var constantName = Strings[input.ReadValueEncodedS32()].Value;
                     var constantValue = input.ReadValueEncodedS32();
                     typeDef.Constants.Add(constantName, constantValue);
                 }
@@ -327,7 +327,7 @@ namespace Gibbed.RED.FileFormats
                 var defaultCount = input.ReadValueEncodedS32();
                 for (int j = 0; j < defaultCount; j++)
                 {
-                    var propName = _strings[input.ReadValueEncodedS32()].Value;
+                    var propName = Strings[input.ReadValueEncodedS32()].Value;
 
                     var dataType = input.ReadValueEncodedS32();
                     if (dataType == 0 || dataType == 1)
@@ -398,7 +398,7 @@ namespace Gibbed.RED.FileFormats
             typeDef.States.Clear();
             for (int j = 0; j < stateCount; j++)
             {
-                var stateName = _strings[input.ReadValueEncodedS32()].Value;
+                var stateName = Strings[input.ReadValueEncodedS32()].Value;
                 var stateTypeId = input.ReadValueEncodedS32();
                 var stateDef = (Script.ClassDefinition) TypeDefs[stateTypeId];
                 typeDef.States.Add(stateName, stateDef);
@@ -407,7 +407,7 @@ namespace Gibbed.RED.FileFormats
             typeDef.NativeProperties.Clear();
             for (int j = 0; j < rawTypeDef.NativePropertyCount; j++)
             {
-                var nativePropertyName = _strings[input.ReadValueEncodedS32()].Value;
+                var nativePropertyName = Strings[input.ReadValueEncodedS32()].Value;
                 typeDef.NativeProperties.Add(nativePropertyName);
             }
 
@@ -415,7 +415,7 @@ namespace Gibbed.RED.FileFormats
             for (int j = 0; j < rawTypeDef.ScriptedPropertyCount; j++)
             {
                 var propTypeId = input.ReadValueEncodedS32();
-                var propName = _strings[input.ReadValueEncodedS32()].Value;
+                var propName = Strings[input.ReadValueEncodedS32()].Value;
                 var propFlags = input.ReadValueEncodedS32();
 
                 var property = new Script.PropertyDefinition()
@@ -464,7 +464,7 @@ namespace Gibbed.RED.FileFormats
             for (int j = 0; j < argumentCount; j++)
             {
                 var argumentTypeId = input.ReadValueEncodedS32();
-                var argumentName = _strings[input.ReadValueEncodedS32()];
+                var argumentName = Strings[input.ReadValueEncodedS32()];
                 var argumentFlags = input.ReadValueEncodedS32();
 
                 ArgumentDefinition argumentDefinition = new ArgumentDefinition();
@@ -479,7 +479,7 @@ namespace Gibbed.RED.FileFormats
             for (int j = 0; j < localCount; j++)
             {
                 var localTypeId = input.ReadValueEncodedS32();
-                var localName = _strings[input.ReadValueEncodedS32()];
+                var localName = Strings[input.ReadValueEncodedS32()];
 
                 var localDefinition = new LocalDefinition()
                                           {
@@ -491,19 +491,22 @@ namespace Gibbed.RED.FileFormats
 
             if ((flags & Script.FunctionFlags.Import) == 0)
             {
-                funcDef.Instructions = ReadBytecode(input);
+                ReadBytecode(input, funcDef);
             }
         }
 
-        private List<Script.IInstruction> ReadBytecode(Stream input)
+        private void ReadBytecode(Stream input, FunctionDefinition funcDef)
         {
+            funcDef.Instructions = new List<IInstruction>();
+            funcDef.InstructionOffsets = new List<int>();
             var unencodedByteCodeLength = input.ReadValueEncodedS32();
             int read;
-            var result = new List<Script.IInstruction>();
             for (read = 0; read < unencodedByteCodeLength;)
             {
+                funcDef.InstructionOffsets.Add(read);
                 var op = input.ReadValueU8();
                 var opcode = (Script.Opcode) op;
+                
                 read++;
                 Script.IInstruction instruction = null;
 
@@ -535,38 +538,38 @@ namespace Gibbed.RED.FileFormats
 
                     case Script.Opcode.OP_StringConst:
                         {
-                            instruction = new StringConst();
+                            instruction = new StringConst(this);
                             break;
                         }
 
-                    case Script.Opcode.OP_Return:
+                    case Script.Opcode.OP_VirtualFunc:
                         {
-                            instruction = new Return();
+                            instruction = new VirtualFunc(this);
                             break;
                         }
 
-                    case Script.Opcode.OP_TestNotEqual:
-                    case Script.Opcode.OP_Jump:
+                    case Script.Opcode.OP_SavePoint:
+                    case Script.Opcode.OP_JumpXXX:
                         {
                             instruction = new U16U16(opcode);
                             break;
                         }
 
-                    case Script.Opcode.OP_LocalVar:
-                    case Script.Opcode.OP_Conditional:
+                    case Script.Opcode.OP_Assign:
+                    case Script.Opcode.OP_JumpIfFalse:
+                    case Script.Opcode.OP_Jump:
                     case Script.Opcode.OP_Skip:
-                    case Script.Opcode.OP_Constructor:
                         {
                             instruction = new U16(opcode);
                             break;
                         }
 
-                    case Script.Opcode.OP_DefaultVar:
+                    case Script.Opcode.OP_LocalVar:
                     case Script.Opcode.OP_ObjectVar:
-                    case Script.Opcode.OP_Switch:
-                    case Script.Opcode.OP_TestEqual:
+                    case Script.Opcode.OP_ParamVar:
+                    case Script.Opcode.OP_TestEqualXXX:
                         {
-                            instruction = new S32S32(opcode, _strings);
+                            instruction = new S32S32(opcode, this);
                             break;
                         }
 
@@ -576,47 +579,47 @@ namespace Gibbed.RED.FileFormats
                             break;
                         }
 
-                    case Script.Opcode.OP_VirtualFunc:
+                    case Script.Opcode.OP_Constructor:
                         {
-                            instruction = new VirtualFunc();
+                            instruction = new Constructor(this);
                             break;
                         }
 
-                    case Script.Opcode.OP_New:
+                    case Script.Opcode.OP_TestEqual:
+                    case Script.Opcode.OP_EnumToInt:
+                    case Script.Opcode.OP_ArrayPushBack:
+                    case Script.Opcode.OP_ArraySize:
                     case Script.Opcode.OP_ArrayElement:
-                    case Script.Opcode.OP_IntToFloat:
-                    case Script.Opcode.OP_BoolToFloat:
-                    case Script.Opcode.OP_StringToBool:
                     case Script.Opcode.OP_This:
-                    case Script.Opcode.OP_BoolToInt:
+                    case Script.Opcode.OP_ArrayClear:
                     case Script.Opcode.OP_EntryFunc:
-                    case Script.Opcode.OP_IntToByte:
-                    case Script.Opcode.OP_FloatToInt:
+                    case Script.Opcode.OP_ArrayContainsFast:
+                    case Script.Opcode.OP_ArrayRemoveFast:
                     case Script.Opcode.OP_Delete:
-                    case Script.Opcode.OP_NameToBool:
+                    case Script.Opcode.OP_ArrayErase:
+                    case Script.Opcode.OP_EnumToString:
+                    case Script.Opcode.OP_ArrayContains:
+                    case Script.Opcode.OP_ArrayResize:
+                    case Script.Opcode.OP_ArrayInsert:
+                    case Script.Opcode.OP_ArrayGrow:
+                    case Script.Opcode.OP_ArrayFindFirstFast:
                     case Script.Opcode.OP_ArrayLast:
-                    case Script.Opcode.OP_IntToBool:
-                    case Script.Opcode.OP_BoolToString:
-                    case Script.Opcode.OP_FloatToBool:
-                    case Script.Opcode.OP_FloatToString:
-                    case Script.Opcode.OP_ByteToInt:
-                    case Script.Opcode.OP_NameToString:
-                    case Script.Opcode.OP_FloatToByte:
+                    case Script.Opcode.OP_ArrayRemove:
                     case Script.Opcode.OP_Breakpoint:
                         {
-                            instruction = new S32(opcode);
+                            instruction = new S32(opcode, this);
                             break;
                         }
 
                     case Script.Opcode.OP_NameConst:
                         {
-                            instruction = new NameConst(_strings);
+                            instruction = new NameConst(Strings);
                             break;
                         }
 
-                    case Script.Opcode.OP_ParamEnd:
+                    case Script.Opcode.OP_FinalFunc:
                         {
-                            instruction = new ParamEnd();
+                            instruction = new FinalFunc(this);
                             break;
                         }
 
@@ -628,38 +631,38 @@ namespace Gibbed.RED.FileFormats
                         }
 
                     case Script.Opcode.OP_Nop:
-                    case Script.Opcode.OP_Context:
+                    case Script.Opcode.OP_ParamEnd:
                     case Script.Opcode.OP_IntZero:
                     case Script.Opcode.OP_IntOne:
                     case Script.Opcode.OP_BoolFalse:
                     case Script.Opcode.OP_BoolTrue:
-                    case Script.Opcode.OP_Assign:
+                    case Script.Opcode.OP_Return:
                     case Script.Opcode.OP_GetServer:
                     case Script.Opcode.OP_GetCamera:
-                    case Script.Opcode.OP_ArrayPushBack:
+                    case Script.Opcode.OP_NameToString:
                     case Script.Opcode.OP_GetPlayer:
-                    case Script.Opcode.OP_ArrayResize:
-                    case Script.Opcode.OP_SavePoint:
+                    case Script.Opcode.OP_IntToFloat:
+                    case Script.Opcode.OP_SavePointXXX:
                     case Script.Opcode.OP_Null:
                     case Script.Opcode.OP_GetGame:
-                    case Script.Opcode.OP_ArrayGrow:
-                    case Script.Opcode.OP_ArrayFindFirst:
-                    case Script.Opcode.OP_ArrayContains:
-                    case Script.Opcode.OP_ArraySize:
-                    case Script.Opcode.OP_ArrayErase:
-                    case Script.Opcode.OP_JumpIfFalse:
                     case Script.Opcode.OP_ObjectToBool:
+                    case Script.Opcode.OP_IntToString:
+                    case Script.Opcode.OP_FloatToString:
+                    case Script.Opcode.OP_IntToByte:
+                    case Script.Opcode.OP_ObjectToString:
+                    case Script.Opcode.OP_JumpIfFalseXXX:
+                    case Script.Opcode.OP_BoolToString:
                     case Script.Opcode.OP_GetHud:
-                    case Script.Opcode.OP_ArrayFindLastFast:
-                    case Script.Opcode.OP_ArrayContainsFast:
+                    case Script.Opcode.OP_FloatToInt:
+                    case Script.Opcode.OP_NameToBool:
                     case Script.Opcode.OP_SaveValue:
-                    case Script.Opcode.OP_ArrayClear:
-                    case Script.Opcode.OP_EnumToString:
-                    case Script.Opcode.OP_ArrayFindFirstFast:
-                    case Script.Opcode.OP_EnumToInt:
-                    case Script.Opcode.OP_ArrayPopBack:
-                    case Script.Opcode.OP_BoolToByte:
-                    case Script.Opcode.OP_ArrayRemove:
+                    case Script.Opcode.OP_IntToBool:
+                    case Script.Opcode.OP_ByteToInt:
+                    case Script.Opcode.OP_FloatToBool:
+                    case Script.Opcode.OP_ByteToFloat:
+                    case Script.Opcode.OP_StringToBool:
+                    case Script.Opcode.OP_DynamicCast:
+                    case Script.Opcode.OP_StringToInt:
                     case Script.Opcode.OP_GetSound:
                         {
                             instruction = new Simple(opcode);
@@ -675,14 +678,13 @@ namespace Gibbed.RED.FileFormats
                 {
                     read += instruction.Deserialize(input);
                 }
-                result.Add(instruction);
+                funcDef.Instructions.Add(instruction);
             }
 
             if (read != unencodedByteCodeLength)
             {
                 throw new InvalidOperationException();
             }
-            return result;
         }
     }
 }

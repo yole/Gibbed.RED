@@ -33,6 +33,7 @@ namespace Gibbed.RED.FileFormats.Script
         public readonly List<ArgumentDefinition> Arguments = new List<ArgumentDefinition>();
         public readonly List<LocalDefinition> Locals = new List<LocalDefinition>();
         public List<IInstruction> Instructions;
+        public List<int> InstructionOffsets;
 
         public override string ToString()
         {
