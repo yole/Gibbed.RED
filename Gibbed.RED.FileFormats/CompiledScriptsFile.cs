@@ -298,77 +298,7 @@ namespace Gibbed.RED.FileFormats
             // parse classes
             for (int i = 0; i < rawTypeDefs.Length; i++)
             {
-                var rawTypeDef = rawTypeDefs[i];
-
-                if (rawTypeDef.Type != Script.NativeType.Class)
-                {
-                    continue;
-                }
-                else if ((rawTypeDef.Flags &
-                    Script.TypeDefinitionFlags.Scripted) == 0)
-                {
-                    continue;
-                }
-
-                var type = (Script.NativeType)input.ReadValueEncodedS32();
-                if (rawTypeDef.Type != type)
-                {
-                    throw new FormatException();
-                }
-
-                var id = input.ReadValueEncodedS32();
-                if (id != i)
-                {
-                    throw new FormatException();
-                }
-
-                var typeDef = (Script.ClassDefinition)TypeDefs[i];
-
-                var isExtending = input.ReadValueEncodedS32();
-                if (isExtending != 0)
-                {
-                    var superTypeId = input.ReadValueEncodedS32();
-                    var superDef = (Script.ClassDefinition)TypeDefs[superTypeId];
-                    typeDef.Super = superDef;
-                }
-
-                var stateCount = input.ReadValueEncodedS32();
-                typeDef.States.Clear();
-                for (int j = 0; j < stateCount; j++)
-                {
-                    var stateName = _strings[input.ReadValueEncodedS32()].Value;
-                    var stateTypeId = input.ReadValueEncodedS32();
-                    var stateDef = (Script.ClassDefinition)TypeDefs[stateTypeId];
-                    typeDef.States.Add(stateName, stateDef);
-                }
-
-                typeDef.NativeProperties.Clear();
-                for (int j = 0; j < rawTypeDef.NativePropertyCount; j++)
-                {
-                    var nativePropertyName = _strings[input.ReadValueEncodedS32()].Value;
-                    typeDef.NativeProperties.Add(nativePropertyName);
-                }
-
-                typeDef.Properties.Clear();
-                for (int j = 0; j < rawTypeDef.ScriptedPropertyCount; j++)
-                {
-                    var propTypeId = input.ReadValueEncodedS32();
-                    var propName = _strings[input.ReadValueEncodedS32()].Value;
-                    var propFlags = input.ReadValueEncodedS32();
-
-                    var property = new Script.PropertyDefinition()
-                    {
-                        Flags = propFlags,
-                        TypeDefinition = TypeDefs[propTypeId],
-                    };
-
-                    typeDef.Properties.Add(propName, property);
-
-                    // 1 = editable
-                    // 2 = const
-                    // 32 = ?
-                    // 32768 = saved
-                }
+                ParseClass(input, rawTypeDefs, i);
             }
 
             // parse class defaults
@@ -425,6 +355,82 @@ namespace Gibbed.RED.FileFormats
             for (int i = 0; i < _rawFuncDefs.Length; i++)
             {
                 ParseFunction(input, i);
+            }
+        }
+
+        private void ParseClass(Stream input, RawTypeDefinition[] rawTypeDefs, int i)
+        {
+            var rawTypeDef = rawTypeDefs[i];
+
+            if (rawTypeDef.Type != Script.NativeType.Class)
+            {
+                return;
+            }
+            else if ((rawTypeDef.Flags &
+                      Script.TypeDefinitionFlags.Scripted) == 0)
+            {
+                return;
+            }
+
+            var type = (Script.NativeType) input.ReadValueEncodedS32();
+            if (rawTypeDef.Type != type)
+            {
+                throw new FormatException();
+            }
+
+            var id = input.ReadValueEncodedS32();
+            if (id != i)
+            {
+                throw new FormatException();
+            }
+
+            var typeDef = (Script.ClassDefinition) TypeDefs[i];
+
+            var isExtending = input.ReadValueEncodedS32();
+            if (isExtending != 0)
+            {
+                var superTypeId = input.ReadValueEncodedS32();
+                var superDef = (Script.ClassDefinition) TypeDefs[superTypeId];
+                typeDef.Super = superDef;
+            }
+
+            var stateCount = input.ReadValueEncodedS32();
+            typeDef.States.Clear();
+            for (int j = 0; j < stateCount; j++)
+            {
+                var stateName = _strings[input.ReadValueEncodedS32()].Value;
+                var stateTypeId = input.ReadValueEncodedS32();
+                var stateDef = (Script.ClassDefinition) TypeDefs[stateTypeId];
+                typeDef.States.Add(stateName, stateDef);
+            }
+
+            typeDef.NativeProperties.Clear();
+            for (int j = 0; j < rawTypeDef.NativePropertyCount; j++)
+            {
+                var nativePropertyName = _strings[input.ReadValueEncodedS32()].Value;
+                typeDef.NativeProperties.Add(nativePropertyName);
+            }
+
+            typeDef.Properties.Clear();
+            for (int j = 0; j < rawTypeDef.ScriptedPropertyCount; j++)
+            {
+                var propTypeId = input.ReadValueEncodedS32();
+                var propName = _strings[input.ReadValueEncodedS32()].Value;
+                var propFlags = input.ReadValueEncodedS32();
+
+                var property = new Script.PropertyDefinition()
+                                   {
+                                       Name = propName,
+                                       Flags = propFlags,
+                                       TypeDefinition = TypeDefs[propTypeId],
+                                   };
+
+                typeDef.Properties.Add(propName, property);
+
+                // 1 = editable
+                // 2 = const
+                // 32 = ?
+                // 32768 = saved
             }
         }
 
@@ -560,7 +566,7 @@ namespace Gibbed.RED.FileFormats
                     case Script.Opcode.OP_Switch:
                     case Script.Opcode.OP_TestEqual:
                         {
-                            instruction = new S32S32(opcode);
+                            instruction = new S32S32(opcode, _strings);
                             break;
                         }
 

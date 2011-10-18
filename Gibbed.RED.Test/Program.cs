@@ -41,9 +41,14 @@ namespace Gibbed.RED.Test
                     if (test.TypeDefs[i] is FileFormats.Script.ClassDefinition)
                     {
                         var classDef = test.TypeDefs[i] as FileFormats.Script.ClassDefinition;
+                        foreach (var propDef in classDef.Properties)
+                        {
+                            Console.WriteLine("    " + propDef.Value);
+                        }
+                        Console.WriteLine();
                         foreach (var funcDef in classDef.Functions)
                         {
-                            Console.WriteLine("    " + funcDef.Value.Name);
+                            Console.WriteLine("    " + funcDef.Value);
                         }
                     }
                 }

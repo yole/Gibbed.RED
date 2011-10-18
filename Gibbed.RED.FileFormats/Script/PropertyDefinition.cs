@@ -24,7 +24,13 @@ namespace Gibbed.RED.FileFormats.Script
 {
     public class PropertyDefinition
     {
+        public string Name;
         public int Flags;
         public TypeDefinition TypeDefinition = null;
+
+        public override string ToString()
+        {
+            return TypeDefinition.Name + " " + Name;
+        }
     }
 }
