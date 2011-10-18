@@ -31,6 +31,7 @@ namespace Gibbed.RED.FileFormats.Script
         public TypeDefinition ContainingClass;
         public TypeDefinition ReturnValue;
         public readonly List<ArgumentDefinition> Arguments = new List<ArgumentDefinition>();
+        public readonly List<LocalDefinition> Locals = new List<LocalDefinition>();
         public List<IInstruction> Instructions;
 
         public override string ToString()

@@ -56,6 +56,14 @@ namespace Gibbed.RED.Test
                     if (funcDef.Instructions != null)
                     {
                         Console.WriteLine("{");
+                        foreach (var local in funcDef.Locals)
+                        {
+                            Console.WriteLine("    " + local);
+                        }
+                        if (funcDef.Locals.Count > 0)
+                        {
+                            Console.WriteLine();
+                        }
                         foreach (var instruction in funcDef.Instructions)
                         {
                             Console.WriteLine("    " + (instruction == null ? "?" : instruction.ToString()));

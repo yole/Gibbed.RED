@@ -111,6 +111,7 @@
     <Compile Include="Script\Instructions\U16S32.cs" />
     <Compile Include="Script\Instructions\U16U16.cs" />
     <Compile Include="Script\Instructions\VirtualFunc.cs" />
+    <Compile Include="Script\LocalDefinition.cs" />
     <Compile Include="Script\PointerDefinition.cs" />
     <Compile Include="Script\PropertyDefault.cs" />
     <Compile Include="Script\PropertyDefinition.cs" />

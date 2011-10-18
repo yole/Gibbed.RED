@@ -474,6 +474,13 @@ namespace Gibbed.RED.FileFormats
             {
                 var localTypeId = input.ReadValueEncodedS32();
                 var localName = _strings[input.ReadValueEncodedS32()];
+
+                var localDefinition = new LocalDefinition()
+                                          {
+                                              Name = localName.Value,
+                                              Type = TypeDefs[localTypeId]
+                                          };
+                funcDef.Locals.Add(localDefinition);
             }
 
             if ((flags & Script.FunctionFlags.Import) == 0)
