@@ -28,6 +28,7 @@ namespace Gibbed.RED.FileFormats.Script
     public class FunctionDefinition
     {
         public string Name;
+        public TypeDefinition ContainingClass;
         public TypeDefinition ReturnValue;
         public readonly List<ArgumentDefinition> Arguments = new List<ArgumentDefinition>();
         public List<IInstruction> Instructions;
@@ -43,7 +44,12 @@ namespace Gibbed.RED.FileFormats.Script
             {
                 result.Append("void");
             }
-            result.Append(" ").Append(Name).Append("(");
+            result.Append(" ");
+            if (ContainingClass != null)
+            {
+                result.Append(ContainingClass.Name).Append("::");
+            }
+            result.Append(Name).Append("(");
             for (int i = 0; i < Arguments.Count; i++)
             {
                 if (i > 0)

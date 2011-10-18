@@ -38,6 +38,7 @@ namespace Gibbed.RED.FileFormats
         public Script.TypeDefinition[] TypeDefs;
         public Script.FunctionDefinition[] FuncDefs;
         private RawString[] _strings;
+        private RawFunctionDefinition[] _rawFuncDefs;
 
         public void Deserialize(Stream input)
         {
@@ -228,7 +229,7 @@ namespace Gibbed.RED.FileFormats
                 TypeDefs[i] = typeDef;
             }
 
-            var rawFuncDefs = new Script.RawFunctionDefinition[funcDefCount];
+            _rawFuncDefs = new Script.RawFunctionDefinition[funcDefCount];
             FuncDefs = new Script.FunctionDefinition[funcDefCount];
 
             for (uint i = 0; i < funcDefCount; i++)
@@ -247,9 +248,10 @@ namespace Gibbed.RED.FileFormats
                     if (typeDef == null)
                         throw new FormatException("expected ClassDefinition, found " + TypeDefs[rawFuncDef.DefinedOnId]);
                     typeDef.Functions[funcDef.Name] = funcDef;
+                    funcDef.ContainingClass = typeDef;
                 }
 
-                rawFuncDefs[i] = rawFuncDef;
+                _rawFuncDefs[i] = rawFuncDef;
                 FuncDefs[i] = funcDef;
             }
 
@@ -420,58 +422,63 @@ namespace Gibbed.RED.FileFormats
             }
 
             // parse functions (awww yeah)
-            for (int i = 0; i < rawFuncDefs.Length; i++)
+            for (int i = 0; i < _rawFuncDefs.Length; i++)
             {
-                var rawFuncDef = rawFuncDefs[i];
-                var funcDef = FuncDefs [i];
+                ParseFunction(input, i);
+            }
+        }
 
-                if ((rawFuncDef.Flags & 1) == 0)
-                {
-                    continue;
-                }
+        private void ParseFunction(Stream input, int index)
+        {
+            var rawFuncDef = _rawFuncDefs[index];
+            var funcDef = FuncDefs[index];
 
-                var id = input.ReadValueEncodedS32();
-                if (id != i)
-                {
-                    throw new FormatException();
-                }
+            if ((rawFuncDef.Flags & 1) == 0)
+            {
+                return;
+            }
 
-                var rawFlags = input.ReadValueEncodedS32();
-                var flags = (Script.FunctionFlags)rawFlags;
+            var id = input.ReadValueEncodedS32();
+            if (id != index)
+            {
+                throw new FormatException();
+            }
 
-                var hasReturnValue = input.ReadValueB8();
-                if (hasReturnValue == true)
-                {
-                    var returnValueTypeId = input.ReadValueEncodedS32();
-                    funcDef.ReturnValue = TypeDefs[returnValueTypeId];
-                }
+            var rawFlags = input.ReadValueEncodedS32();
+            var flags = (Script.FunctionFlags) rawFlags;
 
-                var argumentCount = input.ReadValueEncodedS32();
-                for (int j = 0; j < argumentCount; j++)
-                {
-                    var argumentTypeId = input.ReadValueEncodedS32();
-                    var argumentName = _strings[input.ReadValueEncodedS32()];
-                    var argumentFlags = input.ReadValueEncodedS32();
+            var hasReturnValue = input.ReadValueB8();
+            if (hasReturnValue == true)
+            {
+                var returnValueTypeId = input.ReadValueEncodedS32();
+                funcDef.ReturnValue = TypeDefs[returnValueTypeId];
+            }
 
-                    ArgumentDefinition argumentDefinition = new ArgumentDefinition();
-                    argumentDefinition.Name = argumentName.Value;
-                    argumentDefinition.Type = TypeDefs[argumentTypeId];
-                    argumentDefinition.Flags = argumentFlags;
+            var argumentCount = input.ReadValueEncodedS32();
+            for (int j = 0; j < argumentCount; j++)
+            {
+                var argumentTypeId = input.ReadValueEncodedS32();
+                var argumentName = _strings[input.ReadValueEncodedS32()];
+                var argumentFlags = input.ReadValueEncodedS32();
 
-                    funcDef.Arguments.Add(argumentDefinition);
-                }
+                ArgumentDefinition argumentDefinition = new ArgumentDefinition();
+                argumentDefinition.Name = argumentName.Value;
+                argumentDefinition.Type = TypeDefs[argumentTypeId];
+                argumentDefinition.Flags = argumentFlags;
 
-                var localCount = input.ReadValueEncodedS32();
-                for (int j = 0; j < localCount; j++)
-                {
-                    var localTypeId = input.ReadValueEncodedS32();
-                    var localName = _strings[input.ReadValueEncodedS32()];
-                }
+                funcDef.Arguments.Add(argumentDefinition);
+            }
 
-                if ((flags & Script.FunctionFlags.Import) == 0)
-                {
-                    funcDef.Instructions = ReadBytecode(input);
-                }
+            var localCount = input.ReadValueEncodedS32();
+            for (int j = 0; j < localCount; j++)
+            {
+                var localTypeId = input.ReadValueEncodedS32();
+                var localName = _strings[input.ReadValueEncodedS32()];
+            }
+
+            if ((flags & Script.FunctionFlags.Import) == 0)
+            {
+                funcDef.Instructions = ReadBytecode(input);
             }
         }
 
