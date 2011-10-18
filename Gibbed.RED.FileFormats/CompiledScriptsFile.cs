@@ -522,8 +522,7 @@ namespace Gibbed.RED.FileFormats
 
                     case Script.Opcode.OP_StringConst:
                         {
-                            var op_0 = input.ReadValueEncodedS32();
-                            read += 16;
+                            instruction = new StringConst();
                             break;
                         }
 
@@ -536,10 +535,7 @@ namespace Gibbed.RED.FileFormats
                     case Script.Opcode.OP_TestNotEqual:
                     case Script.Opcode.OP_Jump:
                         {
-                            var op_0 = input.ReadValueU16();
-                            read += 2;
-                            var op_1 = input.ReadValueU16();
-                            read += 2;
+                            instruction = new U16U16(opcode);
                             break;
                         }
 
@@ -563,10 +559,7 @@ namespace Gibbed.RED.FileFormats
 
                     case Script.Opcode.OP_SwitchDefault:
                         {
-                            var op_0 = input.ReadValueEncodedS32();
-                            read += 4;
-                            var op_1 = input.ReadValueU16();
-                            read += 2;
+                            instruction = new S32U16(opcode);
                             break;
                         }
 
@@ -610,26 +603,14 @@ namespace Gibbed.RED.FileFormats
 
                     case Script.Opcode.OP_ParamEnd:
                         {
-                            var op_0 = input.ReadValueU16();
-                            read += 2;
-                            var op_1 = input.ReadValueU16();
-                            read += 2;
-                            var op_2 = input.ReadValueEncodedS32();
-                            if (op_2 == -1)
-                            {
-                                var op_3 = input.ReadValueEncodedS32();
-                            }
-                            read += 4;
+                            instruction = new ParamEnd();
                             break;
                         }
 
                     case Script.Opcode.OP_StructMember:
                     case Script.Opcode.OP_SavePointEnd:
                         {
-                            var op_0 = input.ReadValueU16();
-                            read += 2;
-                            var op_1 = input.ReadValueEncodedS32();
-                            read += 4;
+                            instruction = new U16S32(opcode);
                             break;
                         }
 
