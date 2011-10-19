@@ -38,36 +38,37 @@ namespace Gibbed.RED.FileFormats.Script
         OP_BoolFalse = 11,
         OP_Target = 12,
         OP_Assign = 13,
-        OP_ParamVarXXX = 14,
+        OP_14 = 14,            // unused
         OP_LocalVar = 15,
-        OP_ParamVar = 16,      // was ObjectVar
-        OP_ObjectVar = 17,     // was Switch
-        OP_SwitchLabel = 18,
-        OP_SwitchDefault = 19,
-        OP_JumpXXX = 20,
-        OP_JumpIfFalseXXX = 21,
+        OP_ParamVar = 16,
+        OP_ObjectVar = 17,
+        OP_18 = 18,            // unused
+        OP_Switch = 19,
+        OP_SwitchLabel = 20,
+        OP_SwitchDefault = 21,
         OP_Jump = 22,
         OP_JumpIfFalse = 23,
         OP_Skip = 24,
-        OP_Conditional = 25,  // unused
+        OP_Conditional = 25,   // unused
         OP_Constructor = 26,
         OP_FinalFunc = 27,
         OP_VirtualFunc = 28,
-        OP_StructMember = 29,
+        OP_EntryFunc = 29,
+        
         OP_ParamEnd = 30,
         OP_Return = 31,
-        OP_TestEqualXXX = 32,
-        OP_SavePoint = 33,
+        OP_StructMember = 32,
+        OP_Context = 33,
         OP_TestEqual = 34,
-        OP_Delete = 35,
-        OP_This = 36,
-        OP_Parent = 37,
-        OP_SavePointXXX = 38,
-        OP_SaveValue = 39,
-        OP_SavePointEnd = 40,
-        OP_Breakpoint = 41,
-        
-        OP_DynamicCast = 42,
+        OP_TestNotEqual = 35,  // unused
+        OP_New = 36,
+        OP_Delete = 37,        // unused
+        OP_This = 38,
+        OP_Parent = 39,
+        OP_SavePoint = 40,
+        OP_SaveValue = 41,
+        OP_SavePointEnd = 42,
+
         OP_ArrayClear = 43,
         OP_ArraySize = 44,
         OP_ArrayResize = 45,
@@ -114,7 +115,7 @@ namespace Gibbed.RED.FileFormats.Script
         OP_EnumToString = 85,
         OP_EnumToInt = 86,
 
-        OP_EntryFunc = 87,
+        OP_DynamicCast = 87,       // unused
         OP_GetGame = 88,
         OP_GetServer = 89,
         OP_GetPlayer = 90,

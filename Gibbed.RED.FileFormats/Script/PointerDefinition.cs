@@ -24,5 +24,9 @@ namespace Gibbed.RED.FileFormats.Script
 {
     public class PointerDefinition : TypeDefinition
     {
+        public override string ToString()
+        {
+            return "PointerDefinition: " + Name;
+        }
     }
 }

@@ -548,8 +548,8 @@ namespace Gibbed.RED.FileFormats
                             break;
                         }
 
-                    case Script.Opcode.OP_SavePoint:
-                    case Script.Opcode.OP_JumpXXX:
+                    case Script.Opcode.OP_Context:
+                    case Script.Opcode.OP_SwitchLabel:
                         {
                             instruction = new U16U16(opcode);
                             break;
@@ -567,15 +567,15 @@ namespace Gibbed.RED.FileFormats
                     case Script.Opcode.OP_LocalVar:
                     case Script.Opcode.OP_ObjectVar:
                     case Script.Opcode.OP_ParamVar:
-                    case Script.Opcode.OP_TestEqualXXX:
+                    case Script.Opcode.OP_StructMember:
                         {
-                            instruction = new S32S32(opcode, this);
+                            instruction = new TypeMember(opcode, this);
                             break;
                         }
 
-                    case Script.Opcode.OP_SwitchDefault:
+                    case Script.Opcode.OP_Switch:
                         {
-                            instruction = new S32U16(opcode);
+                            instruction = new Switch();
                             break;
                         }
 
@@ -590,12 +590,12 @@ namespace Gibbed.RED.FileFormats
                     case Script.Opcode.OP_ArrayPushBack:
                     case Script.Opcode.OP_ArraySize:
                     case Script.Opcode.OP_ArrayElement:
-                    case Script.Opcode.OP_This:
+                    case Script.Opcode.OP_New:
                     case Script.Opcode.OP_ArrayClear:
-                    case Script.Opcode.OP_EntryFunc:
+                    case Script.Opcode.OP_DynamicCast:
                     case Script.Opcode.OP_ArrayContainsFast:
                     case Script.Opcode.OP_ArrayRemoveFast:
-                    case Script.Opcode.OP_Delete:
+                    case Script.Opcode.OP_TestNotEqual:
                     case Script.Opcode.OP_ArrayErase:
                     case Script.Opcode.OP_EnumToString:
                     case Script.Opcode.OP_ArrayContains:
@@ -605,9 +605,9 @@ namespace Gibbed.RED.FileFormats
                     case Script.Opcode.OP_ArrayFindFirstFast:
                     case Script.Opcode.OP_ArrayLast:
                     case Script.Opcode.OP_ArrayRemove:
-                    case Script.Opcode.OP_Breakpoint:
+                    case Script.Opcode.OP_SaveValue:
                         {
-                            instruction = new S32(opcode, this);
+                            instruction = new TypeRef(opcode, this);
                             break;
                         }
 
@@ -623,10 +623,10 @@ namespace Gibbed.RED.FileFormats
                             break;
                         }
 
-                    case Script.Opcode.OP_StructMember:
-                    case Script.Opcode.OP_SavePointEnd:
+                    case Script.Opcode.OP_EntryFunc:
+                    case Script.Opcode.OP_SavePoint:
                         {
-                            instruction = new U16S32(opcode);
+                            instruction = new U16S32(opcode, this);
                             break;
                         }
 
@@ -642,7 +642,7 @@ namespace Gibbed.RED.FileFormats
                     case Script.Opcode.OP_NameToString:
                     case Script.Opcode.OP_GetPlayer:
                     case Script.Opcode.OP_IntToFloat:
-                    case Script.Opcode.OP_SavePointXXX:
+                    case Script.Opcode.OP_This:
                     case Script.Opcode.OP_Null:
                     case Script.Opcode.OP_GetGame:
                     case Script.Opcode.OP_ObjectToBool:
@@ -650,18 +650,18 @@ namespace Gibbed.RED.FileFormats
                     case Script.Opcode.OP_FloatToString:
                     case Script.Opcode.OP_IntToByte:
                     case Script.Opcode.OP_ObjectToString:
-                    case Script.Opcode.OP_JumpIfFalseXXX:
+                    case Script.Opcode.OP_SwitchDefault:
                     case Script.Opcode.OP_BoolToString:
                     case Script.Opcode.OP_GetHud:
                     case Script.Opcode.OP_FloatToInt:
                     case Script.Opcode.OP_NameToBool:
-                    case Script.Opcode.OP_SaveValue:
+                    case Script.Opcode.OP_Parent:
                     case Script.Opcode.OP_IntToBool:
                     case Script.Opcode.OP_ByteToInt:
                     case Script.Opcode.OP_FloatToBool:
                     case Script.Opcode.OP_ByteToFloat:
                     case Script.Opcode.OP_StringToBool:
-                    case Script.Opcode.OP_DynamicCast:
+                    case Script.Opcode.OP_SavePointEnd:
                     case Script.Opcode.OP_StringToInt:
                     case Script.Opcode.OP_GetSound:
                         {
@@ -674,10 +674,7 @@ namespace Gibbed.RED.FileFormats
                             throw new NotImplementedException("unhandled " + opcode.ToString());
                         }
                 }
-                if (instruction != null)
-                {
-                    read += instruction.Deserialize(input);
-                }
+                read += instruction.Deserialize(input);
                 funcDef.Instructions.Add(instruction);
             }
 

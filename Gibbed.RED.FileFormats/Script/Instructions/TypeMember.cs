@@ -2,14 +2,14 @@
 
 namespace Gibbed.RED.FileFormats.Script.Instructions
 {
-    class S32S32: IInstruction
+    class TypeMember: IInstruction
     {
         private readonly Opcode _opcode;
         private readonly CompiledScriptsFile _scripts;
-        private int _op0;
-        private int _op1;
+        private int _opNameId;
+        private int _opTypeId;
 
-        public S32S32(Opcode opcode, CompiledScriptsFile scripts)
+        public TypeMember(Opcode opcode, CompiledScriptsFile scripts)
         {
             _opcode = opcode;
             _scripts = scripts;
@@ -17,8 +17,8 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public int Deserialize(Stream input)
         {
-            _op0 = input.ReadValueEncodedS32();
-            _op1 = input.ReadValueEncodedS32();
+            _opNameId = input.ReadValueEncodedS32();
+            _opTypeId = input.ReadValueEncodedS32();
             return 4;
         }
 
@@ -29,11 +29,11 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            if (_op1 == -1)
+            if (_opTypeId == -1)
             {
-                return string.Format("{0}('{1}')", _opcode, _scripts.Strings[_op0].Value);
+                return string.Format("{0}('{1}')", _opcode, _scripts.Strings[_opNameId].Value);
             }
-            return string.Format("{0}('{1}', {2})", _opcode, _scripts.Strings[_op0].Value, _scripts.TypeDefs[_op1].Name);
+            return string.Format("{0}('{1}', {2})", _opcode, _scripts.Strings[_opNameId].Value, _scripts.TypeDefs[_opTypeId].Name);
         }
     }
 }

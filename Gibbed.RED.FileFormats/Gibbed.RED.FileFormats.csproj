@@ -100,9 +100,9 @@
     <Compile Include="Script\Instructions\NameConst.cs" />
     <Compile Include="Script\Instructions\FinalFunc.cs" />
     <Compile Include="Script\Instructions\VirtualFunc.cs" />
-    <Compile Include="Script\Instructions\S32.cs" />
-    <Compile Include="Script\Instructions\S32S32.cs" />
-    <Compile Include="Script\Instructions\S32U16.cs" />
+    <Compile Include="Script\Instructions\TypeRef.cs" />
+    <Compile Include="Script\Instructions\TypeMember.cs" />
+    <Compile Include="Script\Instructions\Switch.cs" />
     <Compile Include="Script\Instructions\ShortConst.cs" />
     <Compile Include="Script\Instructions\Simple.cs" />
     <Compile Include="Script\Instructions\StringConst.cs" />

@@ -5,13 +5,15 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 {
     public class U16S32: IInstruction
     {
-        private Opcode _opcode;
+        private readonly CompiledScriptsFile _scripts;
+        private readonly Opcode _opcode;
         private ushort _op0;
         private int _op1;
 
-        public U16S32(Opcode opcode)
+        public U16S32(Opcode opcode, CompiledScriptsFile scripts)
         {
             _opcode = opcode;
+            _scripts = scripts;
         }
 
         public int Deserialize(Stream input)
@@ -28,7 +30,7 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return _opcode + "(" + _op0 + "," + _op1 + ")";
+            return _opcode + "(" + _op0 + "," + _scripts.Strings[_op1].Value + ")";
         }
     }
 }

@@ -3,15 +3,13 @@ using Gibbed.Helpers;
 
 namespace Gibbed.RED.FileFormats.Script.Instructions
 {
-    public class S32U16: IInstruction
+    public class Switch: IInstruction
     {
-        private readonly Opcode _opcode;
         private int _op0;
         private ushort _op1;
 
-        public S32U16(Opcode opcode)
+        public Switch()
         {
-            _opcode = opcode;
         }
 
         public int Deserialize(Stream input)
@@ -28,7 +26,7 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return _opcode + "(" + _op0 + "," + _op1 + ")";
+            return "Switch(" + _op0 + "," + _op1 + ")";
         }
     }
 }

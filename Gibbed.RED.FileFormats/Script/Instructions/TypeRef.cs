@@ -2,13 +2,13 @@
 
 namespace Gibbed.RED.FileFormats.Script.Instructions
 {
-    public class S32: IInstruction
+    public class TypeRef: IInstruction
     {
         private readonly CompiledScriptsFile _scripts;
         private readonly Opcode _opcode;
-        private int _operand;
+        private int _typeId;
 
-        public S32(Opcode opcode, CompiledScriptsFile scripts)
+        public TypeRef(Opcode opcode, CompiledScriptsFile scripts)
         {
             _opcode = opcode;
             _scripts = scripts;
@@ -16,7 +16,7 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public int Deserialize(Stream input)
         {
-            _operand = input.ReadValueEncodedS32();
+            _typeId = input.ReadValueEncodedS32();
             return 4;
         }
 
@@ -27,11 +27,11 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            if (_opcode == Opcode.OP_EnumToInt)
+            if (_opcode == Opcode.OP_SaveValue)
             {
-                return _opcode + "(" + _scripts.TypeDefs[_operand].Name + ")";
+                return _opcode + "(" + _scripts.Strings[_typeId].Value + ")";
             }
-            return _opcode + "(" + _operand + ")";
+            return _opcode + "(" + (_typeId == -1 ? "-1" :_scripts.TypeDefs[_typeId].Name) + ")";
         }
     }
 }
