@@ -35,7 +35,17 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return "FinalFunc(" + _opFlags + "," + _opTarget + "," + (_opFuncId == -1 ? ((OperatorCode) _opOperator).ToString() : _scripts.FuncDefs[_opFuncId].Name) + ")";
+            if (_opFuncId == -1)
+            {
+                var opName = ((OperatorCode)_opOperator).ToString();
+                int value;
+                if (int.TryParse(opName, out value))
+                {
+                    return "FinalFunc-UnknownOperator(" + _opFlags + "," + _opTarget + "," + opName + ")";
+                }
+                return "FinalFunc(" + _opFlags + "," + _opTarget + "," + opName + ")";
+            }
+            return string.Format("FinalFunc({0},{1},{2})", _opFlags, _opTarget, _scripts.FuncDefs[_opFuncId].Name);
         }
     }
 }
