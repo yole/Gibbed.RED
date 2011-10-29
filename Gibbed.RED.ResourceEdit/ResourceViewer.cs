@@ -31,12 +31,15 @@ namespace Gibbed.RED.ResourceEdit
     {
         private string FilePath;
         private FileFormats.ResourceFile FileData;
+        private Explorer _explorer;
 
-        public ResourceViewer()
+        public ResourceViewer(Explorer explorer)
         {
             this.InitializeComponent();
             this.DoubleBuffered = true;
             this.hintLabel.Text = "";
+            this.MdiParent = explorer;
+            _explorer = explorer;
         }
 
         public void LoadResource(string path)
@@ -152,7 +155,7 @@ namespace Gibbed.RED.ResourceEdit
             }
             else if (obj.Data is FileFormats.Game.GenericObject)
             {
-                var viewer = new GenericObjectViewer()
+                var viewer = new GenericObjectViewer(_explorer)
                 {
                     MdiParent = this.MdiParent,
                 };

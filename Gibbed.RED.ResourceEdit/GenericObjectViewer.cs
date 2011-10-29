@@ -12,8 +12,11 @@ namespace Gibbed.RED.ResourceEdit
 {
     public partial class GenericObjectViewer : Form
     {
-        public GenericObjectViewer()
+        private readonly Explorer _explorer;
+
+        public GenericObjectViewer(Explorer explorer)
         {
+            _explorer = explorer;
             InitializeComponent();
         }
 
@@ -27,7 +30,7 @@ namespace Gibbed.RED.ResourceEdit
                 {
                     ListViewItem item = new ListViewItem(name);
                     item.SubItems.Add(data.GetDataType(name));
-                    item.SubItems.Add(data.GetPropertyValueAsString(name));
+                    item.SubItems.Add(data.GetPropertyValueAsString(name, _explorer.StringsFile));
                     listView1.Items.Add(item);
                 }
             }

@@ -22,6 +22,7 @@
 
 using System;
 using System.Windows.Forms;
+using Gibbed.RED.FileFormats;
 
 namespace Gibbed.RED.ResourceEdit
 {
@@ -67,17 +68,38 @@ namespace Gibbed.RED.ResourceEdit
 
         private void OnOpen(object sender, EventArgs e)
         {
-            if (this.openResourceDialog.ShowDialog() != DialogResult.OK)
+            if (this.openResourceDialog.ShowDialog(this) != DialogResult.OK)
             {
                 return;
             }
 
             foreach (var path in this.openResourceDialog.FileNames)
             {
-                var editor = new ResourceViewer() { MdiParent = this };
+                var editor = new ResourceViewer(this);
                 editor.LoadResource(path);
                 editor.Show();
             }
         }
+
+        private void OnLoadStrings(object sender, EventArgs e)
+        {
+            if (openStringsDialog.ShowDialog(this) != DialogResult.OK)
+            {
+                return;
+            }
+
+            StringsFile = new StringsFile();
+            var openFile = openStringsDialog.OpenFile();
+            try
+            {
+                StringsFile.Deserialize(openFile);
+            }
+            finally
+            {
+                openFile.Close();
+            }
+        }
+
+        public StringsFile StringsFile { get; private set; }
     }
 }

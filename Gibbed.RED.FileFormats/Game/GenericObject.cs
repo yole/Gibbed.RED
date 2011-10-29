@@ -29,6 +29,11 @@ namespace Gibbed.RED.FileFormats.Game
             {
                 get { return _type; }
             }
+
+            public object Value
+            {
+                get { return _value; }
+            }
         }
 
         private readonly string _type;
@@ -66,8 +71,18 @@ namespace Gibbed.RED.FileFormats.Game
             get { return _propertyValues.Keys; }
         }
 
-        public string GetPropertyValueAsString(string name)
+        public string GetPropertyValueAsString(string name, StringsFile stringsFile)
         {
+            if (_propertyValues[name].Type == "LocalizedString" && stringsFile != null)
+            {
+                uint key = (uint) _propertyValues[name].Value;
+                string value;
+                if (!stringsFile.Texts.TryGetValue(key, out value))
+                {
+                    return "<string " + key + " not found>";
+                }
+                return "\"" + stringsFile.Texts[key] + "\"";
+            }
             return _propertyValues[name].ToString();
         }
 

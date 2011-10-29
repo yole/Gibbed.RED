@@ -66,6 +66,8 @@ namespace Gibbed.RED.ResourceEdit
             this.openResourceDialog = new System.Windows.Forms.OpenFileDialog();
             this.mainToolStrip = new System.Windows.Forms.ToolStrip();
             this.openResourceButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
+            this.openStringsDialog = new System.Windows.Forms.OpenFileDialog();
             this.menuStrip.SuspendLayout();
             this.mainToolStrip.SuspendLayout();
             this.SuspendLayout();
@@ -177,7 +179,8 @@ namespace Gibbed.RED.ResourceEdit
             // mainToolStrip
             // 
             this.mainToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openResourceButton});
+            this.openResourceButton,
+            this.toolStripButton1});
             this.mainToolStrip.Location = new System.Drawing.Point(0, 24);
             this.mainToolStrip.Name = "mainToolStrip";
             this.mainToolStrip.Size = new System.Drawing.Size(800, 25);
@@ -192,6 +195,20 @@ namespace Gibbed.RED.ResourceEdit
             this.openResourceButton.Size = new System.Drawing.Size(107, 22);
             this.openResourceButton.Text = "Open Resource";
             this.openResourceButton.Click += new System.EventHandler(this.OnOpen);
+            // 
+            // toolStripButton1
+            // 
+            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
+            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton1.Name = "toolStripButton1";
+            this.toolStripButton1.Size = new System.Drawing.Size(76, 22);
+            this.toolStripButton1.Text = "Load Strings";
+            this.toolStripButton1.Click += new System.EventHandler(this.OnLoadStrings);
+            // 
+            // openStringsDialog
+            // 
+            this.openStringsDialog.Filter = "The Witcher 2 strings files (*.w2strings)|*.w2strings|All files|*.*";
             // 
             // Explorer
             // 
@@ -229,6 +246,8 @@ namespace Gibbed.RED.ResourceEdit
         private System.Windows.Forms.OpenFileDialog openResourceDialog;
         private System.Windows.Forms.ToolStrip mainToolStrip;
         private System.Windows.Forms.ToolStripButton openResourceButton;
+        private System.Windows.Forms.ToolStripButton toolStripButton1;
+        private System.Windows.Forms.OpenFileDialog openStringsDialog;
     }
 }
 
