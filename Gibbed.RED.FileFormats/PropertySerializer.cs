@@ -106,6 +106,20 @@ namespace Gibbed.RED.FileFormats
 
         private static IPropertySerializer GetSerializer(string type)
         {
+            if (type.StartsWith("@"))
+            {
+                string contentType = type.Substring(1);
+                IPropertySerializer elementSerializer = GetSerializer(contentType);
+                if (elementSerializer != null)
+                {
+                    return new ArraySerializer(elementSerializer);
+                }
+                 return new ArraySerializer(new StructureSerializer<GenericObject>());
+            }
+            if (type.StartsWith("*"))
+            {
+                return new PointerSerializer();
+            }
             switch (type)
             {
                 case "String": return new StringSerializer();

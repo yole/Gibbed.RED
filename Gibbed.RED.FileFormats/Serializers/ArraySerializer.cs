@@ -62,6 +62,47 @@ namespace Gibbed.RED.FileFormats.Serializers
         }
     }
 
+    public class ArraySerializer : IPropertySerializer
+    {
+        private readonly IPropertySerializer _elementSerializer;
+
+        public ArraySerializer(IPropertySerializer elementSerializer)
+        {
+            _elementSerializer = elementSerializer;
+        }
+
+
+        public void Serialize(IFileStream stream, object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object Deserialize(IFileStream stream)
+        {
+            uint count = 0;
+            stream.SerializeValue(ref count);
+
+            string elementTypeName = null;
+            stream.SerializeName(ref elementTypeName);
+
+            short unk2 = -1;
+            stream.SerializeValue(ref unk2);
+
+            if (unk2 != -1)
+            {
+                throw new InvalidOperationException();
+            }
+
+            var list = new List<object>();
+            for (uint i = 0; i < count; i++)
+            {
+                var element = _elementSerializer.Deserialize(stream);
+                list.Add(element);
+            }
+            return list;
+        }
+    }
+
     public class ArraySerializer<TElement, TSerializer> : IPropertySerializer
         where TSerializer : IPropertySerializer, new()
     {

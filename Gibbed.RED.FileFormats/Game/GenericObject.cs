@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Gibbed.RED.FileFormats.Game
 {
@@ -22,6 +23,23 @@ namespace Gibbed.RED.FileFormats.Game
                 {
                     return '<' + _type + '>';
                 }
+                if (_value is List<object>)
+                {
+                    var listValue = (List<object>) _value;
+                    if (_type.StartsWith("@*"))  // array of pointers
+                    {
+                        return "[" +
+                               string.Join(", ",
+                                           listValue.Select(
+                                               e => e is GenericObject ? ((GenericObject) e).Type : "IFileObject")) +
+                               "]";
+                    }
+                    return "[" + string.Join(", ", listValue) + "]";
+                }
+                if (_value is GenericObject)
+                {
+                    return "{" + ((GenericObject) _value).Type + "}";
+                }
                 return _value.ToString();
             }
 
@@ -38,6 +56,10 @@ namespace Gibbed.RED.FileFormats.Game
 
         private readonly string _type;
         private readonly Dictionary<string, PropertyValue> _propertyValues = new Dictionary<string, PropertyValue>();
+
+        public GenericObject()
+        {
+        }
 
         public GenericObject(string type)
         {
@@ -89,6 +111,12 @@ namespace Gibbed.RED.FileFormats.Game
         public string GetDataType(string name)
         {
             return _propertyValues[name].Type;
+        }
+
+        public override string ToString()
+        {
+            return "{" + string.Join(", ", _propertyValues.Keys.Select(name => name + ": " + _propertyValues[name])) +
+                   "}";
         }
     }
 }

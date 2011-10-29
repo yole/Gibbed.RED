@@ -25,7 +25,7 @@ using System;
 namespace Gibbed.RED.FileFormats.Serializers
 {
     public class StructureSerializer<TType> : IPropertySerializer
-        where TType : Game.TTypedClass, new()
+        where TType : new()
     {
         public void Serialize(IFileStream stream, object value)
         {
