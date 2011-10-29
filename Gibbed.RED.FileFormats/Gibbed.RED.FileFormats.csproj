@@ -75,6 +75,7 @@
     <Compile Include="Game\ETextureCompression.cs" />
     <Compile Include="Game\ETextureRawFormat.cs" />
     <Compile Include="Game\GameTime.cs" />
+    <Compile Include="Game\GenericObject.cs" />
     <Compile Include="Game\ProbablyMatrix4x4.cs" />
     <Compile Include="Game\Script\CContainer.cs" />
     <Compile Include="Game\TTypedClass.cs" />

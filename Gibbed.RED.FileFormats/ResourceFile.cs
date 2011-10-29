@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Gibbed.Helpers;
+using Gibbed.RED.FileFormats.Game;
 
 namespace Gibbed.RED.FileFormats
 {
@@ -136,7 +137,7 @@ namespace Gibbed.RED.FileFormats
 
                     if (TypeCache.Supports(obj.TypeName) == false)
                     {
-                        obj.Data = new Resource.Dummy();
+                        obj.Data = new GenericObject(obj.TypeName);
                     }
                     else
                     {
@@ -181,7 +182,7 @@ namespace Gibbed.RED.FileFormats
                     {
                         obj.Data.Serialize(reader);
 
-                        if (reader.Position != reader.Length)
+                        if (!(obj.Data is GenericObject) && reader.Position != reader.Length)
                         {
                             throw new FormatException();
                         }

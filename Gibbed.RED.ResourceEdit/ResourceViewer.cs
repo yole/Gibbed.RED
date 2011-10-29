@@ -150,6 +150,15 @@ namespace Gibbed.RED.ResourceEdit
                 viewer.LoadResource(obj.Data);
                 viewer.Show();
             }
+            else if (obj.Data is FileFormats.Game.GenericObject)
+            {
+                var viewer = new GenericObjectViewer()
+                {
+                    MdiParent = this.MdiParent,
+                };
+                viewer.LoadResource((FileFormats.Game.GenericObject) obj.Data);
+                viewer.Show();
+            }
             else
             {
                 MessageBox.Show(

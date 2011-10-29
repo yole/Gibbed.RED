@@ -52,6 +52,12 @@
     <Compile Include="Explorer.Designer.cs">
       <DependentUpon>Explorer.cs</DependentUpon>
     </Compile>
+    <Compile Include="GenericObjectViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GenericObjectViewer.Designer.cs">
+      <DependentUpon>GenericObjectViewer.cs</DependentUpon>
+    </Compile>
     <Compile Include="ObjectViewer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -74,6 +80,9 @@
     </Compile>
     <EmbeddedResource Include="Explorer.resx">
       <DependentUpon>Explorer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GenericObjectViewer.resx">
+      <DependentUpon>GenericObjectViewer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ObjectViewer.resx">
       <DependentUpon>ObjectViewer.cs</DependentUpon>

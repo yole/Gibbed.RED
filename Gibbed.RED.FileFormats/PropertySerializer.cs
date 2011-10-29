@@ -22,6 +22,8 @@
 
 using System;
 using System.Collections.Generic;
+using Gibbed.RED.FileFormats.Game;
+using Gibbed.RED.FileFormats.Serializers;
 
 namespace Gibbed.RED.FileFormats
 {
@@ -65,7 +67,14 @@ namespace Gibbed.RED.FileFormats
 
                     var end = start + size;
 
-                    ReadPropertyValue(stream, target, type, name);
+                    if (target is GenericObject)
+                    {
+                        ReadGenericObjectProperty((GenericObject) target, stream, type, size, name);
+                    }
+                    else
+                    {
+                        ReadPropertyValue(stream, target, type, name);
+                    }
 
                     if (stream.Position != end)
                     {
@@ -76,6 +85,35 @@ namespace Gibbed.RED.FileFormats
             else
             {
                 throw new NotSupportedException();
+            }
+        }
+
+        private static void ReadGenericObjectProperty(GenericObject target, IFileStream stream, string type, uint size, string name)
+        {
+            IPropertySerializer serializer = GetSerializer(type);
+            if (serializer != null)
+            {
+                target.SetProperty(name, type, serializer.Deserialize(stream));
+            }
+            else
+            {
+                uint valueSize = size - 4;
+                byte[] value = new byte[valueSize];
+                stream.SerializeValue(ref value, valueSize);
+                target.SetProperty(name, type, value);
+            }
+        }
+
+        private static IPropertySerializer GetSerializer(string type)
+        {
+            switch (type)
+            {
+                case "String": return new StringSerializer();
+                case "Uint": return new UintSerializer();
+                case "Bool": return new BoolSerializer();
+                case "CName": return new CNameSerializer();
+                case "LocalizedString": return new LocalizedStringSerializer();
+                default: return null;
             }
         }
 
