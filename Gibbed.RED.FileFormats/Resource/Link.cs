@@ -32,5 +32,10 @@ namespace Gibbed.RED.FileFormats.Resource
         {
             throw new NotSupportedException();
         }
+
+        public override string ToString()
+        {
+            return "Link: " + Info;
+        }
     }
 }

@@ -36,6 +36,10 @@ namespace Gibbed.RED.FileFormats.Game
                     }
                     return "[" + string.Join(", ", listValue) + "]";
                 }
+                if (_value is List<string>)
+                {
+                    return string.Join(", ", (List<string>) _value);
+                }
                 if (_value is GenericObject)
                 {
                     return "{" + ((GenericObject) _value).Type + "}";

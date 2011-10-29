@@ -120,13 +120,21 @@ namespace Gibbed.RED.FileFormats
             {
                 return new PointerSerializer();
             }
+            if (type.StartsWith("E"))
+            {
+                // it's actually an enum but we simply deserialize the enum member name
+                return new CNameSerializer();
+            }
             switch (type)
             {
                 case "String": return new StringSerializer();
+                case "Int": return new IntSerializer();
                 case "Uint": return new UintSerializer();
                 case "Bool": return new BoolSerializer();
+                case "Float": return new FloatSerializer();
                 case "CName": return new CNameSerializer();
                 case "LocalizedString": return new LocalizedStringSerializer();
+                case "TagList": return new TagListSerializer();
                 default: return null;
             }
         }
