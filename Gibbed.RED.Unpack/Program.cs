@@ -40,6 +40,7 @@ namespace Gibbed.RED.Unpack
         {
             bool showHelp = false;
             bool overwriteFiles = false;
+            bool list = false;
             string cdkey = null;
             string extensionFilter = null;
 
@@ -64,7 +65,12 @@ namespace Gibbed.RED.Unpack
                     "h|help",
                     "show this message and exit", 
                     v => showHelp = v != null
-                },
+                }, 
+                {
+                    "l|list",
+                    "print a list of archive contents, don't unpack anything",
+                    v => list = v != null
+                }
             };
 
             List<string> extras;
@@ -123,6 +129,8 @@ namespace Gibbed.RED.Unpack
 
                     Console.WriteLine("[{0}/{1}] {2}",
                         current, total, entry.Name);
+
+                    if (list) continue;
 
                     Directory.CreateDirectory(Path.GetDirectoryName(entryPath));
 
