@@ -8,6 +8,7 @@ namespace Gibbed.RED.ScriptDecompiler
     {
         private readonly FunctionDefinition _func;
         private int _currentIndex;
+        private bool _incomplete = false;
 
         public FunctionDecompiler(FunctionDefinition func)
         {
@@ -25,7 +26,7 @@ namespace Gibbed.RED.ScriptDecompiler
                 if (statement == null)
                     break;
                 result.Add(statement);
-                if (!statement.Complete)
+                if (_incomplete)
                 {
                     break;
                 }
@@ -145,14 +146,13 @@ namespace Gibbed.RED.ScriptDecompiler
                     return ReadUnaryExpression(target, "dynamic_cast<" + ((TypeRef) currentInstruction).TypeName + ">(", ")");
             }
 
-
+            _incomplete = true;
             return new UnknownExpression(currentInstruction);
         }
 
         private List<Expression> ReadArgumentList()
         {
             var args = new List<Expression>();
-            bool incomplete = false;
             while (CurrentInstruction.Opcode != Opcode.OP_ParamEnd)
             {
                 if (CurrentInstruction.Opcode == Opcode.OP_Nop)
@@ -163,13 +163,12 @@ namespace Gibbed.RED.ScriptDecompiler
                 }
                 var nextExpression = ReadNextExpression();
                 args.Add(nextExpression);
-                if (!nextExpression.Complete)
+                if (_incomplete)
                 {
-                    incomplete = true;
                     break;
                 }
             }
-            if (!incomplete)
+            if (!_incomplete)
                 _currentIndex++; // skip paramEnd
             return args;
         }
@@ -188,7 +187,7 @@ namespace Gibbed.RED.ScriptDecompiler
         private Expression ReadBinaryExpression(int target, string infix, string suffix)
         {
             var lhs = ReadNextExpression();
-            var rhs = lhs.Complete ? ReadNextExpression() : null;
+            var rhs = _incomplete ? null : ReadNextExpression();
             return new BinaryExpression(target, infix, suffix, lhs, rhs);
         }
 

@@ -7,10 +7,6 @@ namespace Gibbed.RED.ScriptDecompiler
 {
     public abstract class Expression
     {
-        public virtual bool Complete
-        {
-            get { return true; }
-        }
     }
 
     public class SimpleExpression: Expression
@@ -41,11 +37,6 @@ namespace Gibbed.RED.ScriptDecompiler
         {
             return "<unknown statement: " + _instruction;
         }
-
-        public override bool Complete
-        {
-            get { return false; }
-        }
     }
 
     public class BinaryExpression: Expression
@@ -61,11 +52,6 @@ namespace Gibbed.RED.ScriptDecompiler
             _suffix = suffix;
             _lhs = lhs;
             _rhs = rhs;
-        }
-
-        public override bool Complete
-        {
-            get { return _lhs.Complete && _rhs != null && _rhs.Complete; }
         }
 
         public override string ToString()
@@ -87,11 +73,6 @@ namespace Gibbed.RED.ScriptDecompiler
             _suffix = suffix;
         }
 
-        public override bool Complete
-        {
-            get { return _operand.Complete; }
-        }
-
         public override string ToString()
         {
             return _prefix + _operand + _suffix;
@@ -107,11 +88,6 @@ namespace Gibbed.RED.ScriptDecompiler
         {
             _functionName = functionName;
             _args = args;
-        }
-
-        public override bool Complete
-        {
-            get { return !_args.Any(arg => !arg.Complete); }
         }
 
         public override string ToString()
