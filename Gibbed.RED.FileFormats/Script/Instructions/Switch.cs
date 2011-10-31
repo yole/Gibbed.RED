@@ -8,8 +8,9 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
         private int _op0;
         private ushort _op1;
 
-        public Switch()
+        public Opcode Opcode
         {
+            get { return Opcode.OP_Switch; }
         }
 
         public int Deserialize(Stream input)

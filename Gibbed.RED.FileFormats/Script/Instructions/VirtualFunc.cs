@@ -15,6 +15,11 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
             _scripts = scripts;
         }
 
+        public Opcode Opcode
+        {
+            get { return Opcode.OP_VirtualFunc; }
+        }
+
         public int Deserialize(Stream input)
         {
             _opFlags = input.ReadValueU16();
@@ -30,7 +35,12 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return "VirtualFunc(" + _opFlags + "," + _opTargetNum + "," + _scripts.Strings[_opFuncName].Value + ")";
+            return "VirtualFunc(" + _opFlags + "," + _opTargetNum + "," + FunctionName + ")";
+        }
+
+        public string FunctionName
+        {
+            get { return _scripts.Strings[_opFuncName].Value; }
         }
     }
 }

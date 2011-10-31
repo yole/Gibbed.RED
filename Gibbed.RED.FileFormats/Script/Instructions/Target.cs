@@ -8,6 +8,11 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
         private int _op0;
         private byte _op1;
 
+        public Opcode Opcode
+        {
+            get { return Opcode.OP_Target; }
+        }
+
         public int Deserialize(Stream input)
         {
             _op0 = input.ReadValueEncodedS32();
@@ -24,5 +29,7 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
         {
             return "Target(" + _op0 + "," + _op1 + ")";
         }
+
+        public int Op0 { get { return _op0; } }
     }
 }

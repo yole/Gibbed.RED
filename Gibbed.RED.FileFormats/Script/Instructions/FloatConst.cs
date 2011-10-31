@@ -5,11 +5,14 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 {
     public class FloatConst: IInstruction
     {
-        private float _value;
+        public Opcode Opcode
+        {
+            get { return Opcode.OP_FloatConst; }
+        }
 
         public int Deserialize(Stream input)
         {
-            _value = input.ReadValueF32();
+            Value = input.ReadValueF32();
             return 4;
         }
 
@@ -20,7 +23,9 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return "FloatConst(" + _value + ")";
+            return "FloatConst(" + Value + ")";
         }
+
+        public float Value { get; private set; }
     }
 }

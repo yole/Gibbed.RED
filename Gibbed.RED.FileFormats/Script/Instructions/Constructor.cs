@@ -14,6 +14,11 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
             _scripts = scripts;
         }
 
+        public Opcode Opcode
+        {
+            get { return Opcode.OP_Constructor; }
+        }
+
         public int Deserialize(Stream input)
         {
             _op0 = input.ReadValueU8();

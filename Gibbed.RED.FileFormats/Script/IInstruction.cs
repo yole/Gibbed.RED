@@ -26,6 +26,7 @@ namespace Gibbed.RED.FileFormats.Script
 {
     public interface IInstruction
     {
+        Opcode Opcode { get; }
         int Deserialize(Stream input);
         void Serialize(ICodeWriter output);
     }

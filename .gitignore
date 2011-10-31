@@ -3,3 +3,4 @@ obj
 _ReSharper*
 *.suo
 *.ReSharper.user
+*.csproj.user

@@ -7,6 +7,11 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
     {
         private short _value;
 
+        public Opcode Opcode
+        {
+            get { return Opcode.OP_ShortConst; }
+        }
+
         public int Deserialize(Stream input)
         {
             _value = input.ReadValueS16();

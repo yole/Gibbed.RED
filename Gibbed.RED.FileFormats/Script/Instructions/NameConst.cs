@@ -12,6 +12,11 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
             _strings = strings;
         }
 
+        public Opcode Opcode
+        {
+            get { return Opcode.OP_NameConst; }
+        }
+
         public int Deserialize(Stream input)
         {
             int index = input.ReadValueEncodedS32();

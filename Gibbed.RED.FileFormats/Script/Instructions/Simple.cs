@@ -16,6 +16,11 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
             return _opcode.ToString();
         }
 
+        public Opcode Opcode
+        {
+            get { return _opcode; }
+        }
+
         public int Deserialize(Stream input)
         {
             return 0;

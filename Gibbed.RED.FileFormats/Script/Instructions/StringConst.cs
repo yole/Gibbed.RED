@@ -12,6 +12,11 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
             _scripts = scripts;
         }
 
+        public Opcode Opcode
+        {
+            get { return Opcode.OP_StringConst; }
+        }
+
         public int Deserialize(Stream input)
         {
             _op0 = input.ReadValueEncodedS32();
@@ -25,7 +30,12 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return "StringConst('" + _scripts.Strings[_op0].Value + "')";
+            return "StringConst('" + Value + "')";
+        }
+
+        public string Value
+        {
+            get { return _scripts.Strings[_op0].Value; }
         }
     }
 }

@@ -30,6 +30,11 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
     {
         private int _value;
 
+        public Opcode Opcode
+        {
+            get { return Opcode.OP_IntConst; }
+        }
+
         public int Deserialize(Stream input)
         {
             _value = input.ReadValueEncodedS32();

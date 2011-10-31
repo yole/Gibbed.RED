@@ -37,6 +37,11 @@ namespace Gibbed.RED.FileFormats.Script
 
         public override string ToString()
         {
+            return ToString(true);
+        }
+
+        public string ToString(bool includeContainingClass)
+        {
             var result = new StringBuilder();
             if (ReturnValue != null)
             {
@@ -47,7 +52,7 @@ namespace Gibbed.RED.FileFormats.Script
                 result.Append("void");
             }
             result.Append(" ");
-            if (ContainingClass != null)
+            if (ContainingClass != null && includeContainingClass)
             {
                 result.Append(ContainingClass.Name).Append("::");
             }

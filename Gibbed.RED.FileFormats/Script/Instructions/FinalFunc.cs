@@ -16,6 +16,11 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
             _scripts = scripts;
         }
 
+        public Opcode Opcode
+        {
+            get { return Opcode.OP_FinalFunc; }
+        }
+
         public int Deserialize(Stream input)
         {
             _opFlags = input.ReadValueU16();

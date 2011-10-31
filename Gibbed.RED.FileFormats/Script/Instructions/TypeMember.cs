@@ -2,7 +2,7 @@
 
 namespace Gibbed.RED.FileFormats.Script.Instructions
 {
-    class TypeMember: IInstruction
+    public class TypeMember: IInstruction
     {
         private readonly Opcode _opcode;
         private readonly CompiledScriptsFile _scripts;
@@ -13,6 +13,11 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
         {
             _opcode = opcode;
             _scripts = scripts;
+        }
+
+        public Opcode Opcode
+        {
+            get { return _opcode; }
         }
 
         public int Deserialize(Stream input)
@@ -31,9 +36,14 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
         {
             if (_opTypeId == -1)
             {
-                return string.Format("{0}('{1}')", _opcode, _scripts.Strings[_opNameId].Value);
+                return string.Format("{0}('{1}')", _opcode, MemberName);
             }
-            return string.Format("{0}('{1}', {2})", _opcode, _scripts.Strings[_opNameId].Value, _scripts.TypeDefs[_opTypeId].Name);
+            return string.Format("{0}('{1}', {2})", _opcode, MemberName, _scripts.TypeDefs[_opTypeId].Name);
+        }
+
+        public string MemberName
+        {
+            get { return _scripts.Strings[_opNameId].Value; }
         }
     }
 }

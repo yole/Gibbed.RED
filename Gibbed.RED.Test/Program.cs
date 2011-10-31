@@ -31,7 +31,7 @@ namespace Gibbed.RED.Test
     {
         public static void Main(string[] args)
         {
-            using (var input = File.OpenRead(@"C:\Program Files (x86)\Steam\steamapps\common\the witcher 2\CookedPC\compiledscripts.w2scripts"))
+            using (var input = File.OpenRead(@"C:\src\w2\compiledscripts.w2scripts"))
             {
                 var test = new CompiledScriptsFile();
                 test.Deserialize(input);
