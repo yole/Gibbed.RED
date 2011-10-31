@@ -28,8 +28,8 @@
         OperatorFloatGreaterEqual = 32,
         FloatAssignAdd = 33,
         FloatAssignSubtract = 34,
-        OperatorBoolAnd = 57,
-        OperatorBoolOr = 58,
-        OperatorBoolNot = 59,
+        BoolAnd = 57,
+        BoolOr = 58,
+        BoolNot = 59,
     }
 }

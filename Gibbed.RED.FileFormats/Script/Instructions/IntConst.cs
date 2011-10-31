@@ -28,8 +28,6 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
     [OpcodeHandler(Opcode.OP_IntConst)]
     public class IntConst : IInstruction
     {
-        private int _value;
-
         public Opcode Opcode
         {
             get { return Opcode.OP_IntConst; }
@@ -37,7 +35,7 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public int Deserialize(Stream input)
         {
-            _value = input.ReadValueEncodedS32();
+            Value = input.ReadValueEncodedS32();
             return 4;
         }
 
@@ -48,7 +46,9 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return "IntConst(" + _value + ")";
+            return "IntConst(" + Value + ")";
         }
+
+        public int Value { get; private set; }
     }
 }

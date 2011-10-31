@@ -126,6 +126,8 @@ namespace Gibbed.RED.ScriptDecompiler
                     return new SimpleExpression("1");
                 case Opcode.OP_Null:
                     return new SimpleExpression("null");
+                case Opcode.OP_IntConst:
+                    return new SimpleExpression(((IntConst)currentInstruction).Value.ToString());
                 case Opcode.OP_FloatConst:
                     return new SimpleExpression(((FloatConst)currentInstruction).Value.ToString());
                 case Opcode.OP_StringConst:
@@ -139,11 +141,21 @@ namespace Gibbed.RED.ScriptDecompiler
                     return ReadUnaryExpression(target, "", ".Size");
                 case Opcode.OP_ArrayPushBack:
                     return ReadBinaryExpression(target, ".PushBack(", ")");
+                case Opcode.OP_ArrayRemoveFast:
+                    return ReadBinaryExpression(target, ".RemoveFast(", ")");
+                case Opcode.OP_ArrayContainsFast:
+                    return ReadBinaryExpression(target, ".ContainsFast(", ")");
                 case Opcode.OP_ArrayElement:
                     return ReadBinaryExpression(target, "[", "]");
 
                 case Opcode.OP_DynamicCast:
                     return ReadUnaryExpression(target, "dynamic_cast<" + ((TypeRef) currentInstruction).TypeName + ">(", ")");
+
+                case Opcode.OP_NameToString:
+                    return ReadUnaryExpression(target, "(string) ", "");
+                case Opcode.OP_ByteToInt:
+                    return ReadUnaryExpression(target, "(byte) ", "");
+
             }
 
             _incomplete = true;
@@ -219,6 +231,15 @@ namespace Gibbed.RED.ScriptDecompiler
                 case OperatorCode.IntAssignSubtract:
                 case OperatorCode.FloatAssignSubtract:
                     return "-=";
+
+                case OperatorCode.BoolAnd:
+                    return "&&";
+
+                case OperatorCode.BoolOr:
+                    return "||";
+
+                case OperatorCode.BoolNot:
+                    return "!";
 
                 default:
                     return null;
