@@ -38,7 +38,12 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
             {
                 return string.Format("{0}('{1}')", _opcode, MemberName);
             }
-            return string.Format("{0}('{1}', {2})", _opcode, MemberName, _scripts.TypeDefs[_opTypeId].Name);
+            return string.Format("{0}('{1}', {2})", _opcode, MemberName, TypeName);
+        }
+
+        public string TypeName
+        {
+            get { return _scripts.TypeDefs[_opTypeId].Name; }
         }
 
         public string MemberName

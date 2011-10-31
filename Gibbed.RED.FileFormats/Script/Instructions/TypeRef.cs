@@ -36,7 +36,12 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
             {
                 return _opcode + "(" + _scripts.Strings[_typeId].Value + ")";
             }
-            return _opcode + "(" + (_typeId == -1 ? "-1" :_scripts.TypeDefs[_typeId].Name) + ")";
+            return _opcode + "(" + TypeName + ")";
+        }
+
+        public string TypeName
+        {
+            get { return (_typeId == -1 ? "-1" :_scripts.TypeDefs[_typeId].Name); }
         }
     }
 }

@@ -56,13 +56,13 @@ namespace Gibbed.RED.ScriptDecompiler
             switch (currentInstruction.Opcode)
             {
                 case Opcode.OP_Assign:
-                    return ReadBinaryExpession(target, " = ");
+                    return ReadBinaryExpression(target, " = ", "");
                 case Opcode.OP_Context:
                     {
                         var context = (U16U16)currentInstruction;
                         if (context.Op0 == 0)
                         {
-                            return ReadBinaryExpession(target, ".");
+                            return ReadBinaryExpression(target, ".", "");
                         }
                     }
                     break;
@@ -71,32 +71,50 @@ namespace Gibbed.RED.ScriptDecompiler
                 case Opcode.OP_VirtualFunc:
                     {
                         var virtualFunc = (VirtualFunc)currentInstruction;
-                        var args = new List<Expression>();
-                        bool incomplete = false;
-                        while (_func.Instructions[_currentIndex].Opcode != Opcode.OP_ParamEnd)
-                        {
-                            var nextExpression = ReadNextExpression();
-                            args.Add(nextExpression);
-                            if (!nextExpression.Complete)
-                            {
-                                incomplete = true;
-                                break;
-                            }
-                        }
-                        if (!incomplete)
-                            _currentIndex++;   // skip paramEnd
+                        var args = ReadArgumentList();
                         return new CallStatement(virtualFunc.FunctionName, args);
                     }
+                case Opcode.OP_FinalFunc:
+                    {
+                        var finalFunc = (FinalFunc) currentInstruction;
+                        if (finalFunc.OpFuncId != -1)
+                        {
+                            var args = ReadArgumentList();
+                            return new CallStatement(finalFunc.FunctionName, args);
+                        }
+                        else
+                        {
+                            string opName = GetOperator(finalFunc.OpOperator);
+                            if (opName != null)
+                            {
+                                var expression = ReadBinaryExpression(target, " " + opName + " ", "");
+                                if (CurrentInstruction.Opcode == Opcode.OP_ParamEnd)
+                                {
+                                    _currentIndex++;
+                                    return expression;
+                                }
+                            }
+                        }
+                    }
+                    break;
                 case Opcode.OP_ObjectVar:
                 case Opcode.OP_ParamVar:
                 case Opcode.OP_LocalVar:
                     return new SimpleExpression(((TypeMember)currentInstruction).MemberName);
+                case Opcode.OP_StructMember:
+                    return ReadUnaryExpression(target, "", "." + (((TypeMember) currentInstruction).MemberName));
+                
                 case Opcode.OP_GetPlayer:
                     return new SimpleExpression("Player");
                 case Opcode.OP_GetHud:
                     return new SimpleExpression("Hud");
                 case Opcode.OP_GetGame:
                     return new SimpleExpression("Game");
+                case Opcode.OP_GetSound:
+                    return new SimpleExpression("Sound");
+                case Opcode.OP_GetCamera:
+                    return new SimpleExpression("Camera");
+
                 case Opcode.OP_BoolFalse:
                     return new SimpleExpression("false");
                 case Opcode.OP_BoolTrue:
@@ -105,16 +123,60 @@ namespace Gibbed.RED.ScriptDecompiler
                     return new SimpleExpression("0");
                 case Opcode.OP_IntOne:
                     return new SimpleExpression("1");
+                case Opcode.OP_Null:
+                    return new SimpleExpression("null");
                 case Opcode.OP_FloatConst:
                     return new SimpleExpression(((FloatConst)currentInstruction).Value.ToString());
                 case Opcode.OP_StringConst:
                     return new SimpleExpression("\"" + ((StringConst)currentInstruction).Value + "\"");
+                case Opcode.OP_NameConst:
+                    return new SimpleExpression("'" + ((NameConst)currentInstruction).Value + "'");
+                
+                case Opcode.OP_ArrayClear:
+                    return ReadUnaryExpression(target, "", ".Clear()");
                 case Opcode.OP_ArraySize:
                     return ReadUnaryExpression(target, "", ".Size");
+                case Opcode.OP_ArrayPushBack:
+                    return ReadBinaryExpression(target, ".PushBack(", ")");
+                case Opcode.OP_ArrayElement:
+                    return ReadBinaryExpression(target, "[", "]");
+
+                case Opcode.OP_DynamicCast:
+                    return ReadUnaryExpression(target, "dynamic_cast<" + ((TypeRef) currentInstruction).TypeName + ">(", ")");
             }
 
 
             return new UnknownExpression(currentInstruction);
+        }
+
+        private List<Expression> ReadArgumentList()
+        {
+            var args = new List<Expression>();
+            bool incomplete = false;
+            while (CurrentInstruction.Opcode != Opcode.OP_ParamEnd)
+            {
+                if (CurrentInstruction.Opcode == Opcode.OP_Nop)
+                {
+                    args.Add(new SimpleExpression("null"));
+                    _currentIndex++;
+                    continue;
+                }
+                var nextExpression = ReadNextExpression();
+                args.Add(nextExpression);
+                if (!nextExpression.Complete)
+                {
+                    incomplete = true;
+                    break;
+                }
+            }
+            if (!incomplete)
+                _currentIndex++; // skip paramEnd
+            return args;
+        }
+
+        private IInstruction CurrentInstruction
+        {
+            get { return _func.Instructions[_currentIndex]; }
         }
 
         private Expression ReadUnaryExpression(int target, string prefix, string suffix)
@@ -123,11 +185,45 @@ namespace Gibbed.RED.ScriptDecompiler
             return new UnaryExpression(target, operand, prefix, suffix);
         }
 
-        private Expression ReadBinaryExpession(int target, string infix)
+        private Expression ReadBinaryExpression(int target, string infix, string suffix)
         {
             var lhs = ReadNextExpression();
             var rhs = lhs.Complete ? ReadNextExpression() : null;
-            return new BinaryExpression(target, infix, lhs, rhs);
+            return new BinaryExpression(target, infix, suffix, lhs, rhs);
+        }
+
+        private string GetOperator(OperatorCode code)
+        {
+            switch (code)
+            {
+                case OperatorCode.IntAdd:
+                case OperatorCode.FloatAdd:
+                case OperatorCode.StringAdd:
+                    return "+";
+
+                case OperatorCode.IntSubtract:
+                case OperatorCode.FloatSubtract:
+                    return "-";
+
+                case OperatorCode.IntMultiply:
+                case OperatorCode.FloatMultiply:
+                    return "*";
+
+                case OperatorCode.IntDivide:
+                case OperatorCode.FloatDivide:
+                    return "/";
+
+                case OperatorCode.IntAssignAdd:
+                case OperatorCode.FloatAssignAdd:
+                    return "+=";
+
+                case OperatorCode.IntAssignSubtract:
+                case OperatorCode.FloatAssignSubtract:
+                    return "-=";
+
+                default:
+                    return null;
+            }
         }
     }
 }

@@ -2,12 +2,11 @@
 
 namespace Gibbed.RED.FileFormats.Script.Instructions
 {
-    class NameConst: IInstruction
+    public class NameConst: IInstruction
     {
         private readonly RawString[] _strings;
-        private string _value;
 
-        public NameConst(RawString[] strings)
+        internal NameConst(RawString[] strings)
         {
             _strings = strings;
         }
@@ -20,7 +19,7 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
         public int Deserialize(Stream input)
         {
             int index = input.ReadValueEncodedS32();
-            _value = _strings[index].Value;
+            Value = _strings[index].Value;
             return 4;
         }
 
@@ -31,7 +30,9 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return "NameConst('" + _value + "')";
+            return "NameConst('" + Value + "')";
         }
+
+        public string Value { get; private set; }
     }
 }

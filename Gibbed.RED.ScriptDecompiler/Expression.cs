@@ -53,10 +53,12 @@ namespace Gibbed.RED.ScriptDecompiler
         private readonly Expression _lhs;
         private readonly Expression _rhs;
         private readonly string _infix;
+        private readonly string _suffix;
 
-        public BinaryExpression(int target, string infix, Expression lhs, Expression rhs)
+        public BinaryExpression(int target, string infix, string suffix, Expression lhs, Expression rhs)
         {
             _infix = infix;
+            _suffix = suffix;
             _lhs = lhs;
             _rhs = rhs;
         }
@@ -68,7 +70,7 @@ namespace Gibbed.RED.ScriptDecompiler
 
         public override string ToString()
         {
-            return _lhs + _infix + (_rhs != null ? _rhs.ToString() : "?");
+            return _lhs + _infix + (_rhs != null ? _rhs.ToString() : "?") + _suffix;
         }
     }
 

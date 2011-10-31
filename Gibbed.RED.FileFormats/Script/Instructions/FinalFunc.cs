@@ -8,8 +8,6 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
         private readonly CompiledScriptsFile _scripts;
         private ushort _opFlags;
         private ushort _opTarget;
-        private int _opFuncId;
-        private int _opOperator;
 
         public FinalFunc(CompiledScriptsFile scripts)
         {
@@ -25,10 +23,10 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
         {
             _opFlags = input.ReadValueU16();
             _opTarget = input.ReadValueU16();
-            _opFuncId = input.ReadValueEncodedS32();
-            if (_opFuncId == -1)
+            OpFuncId = input.ReadValueEncodedS32();
+            if (OpFuncId == -1)
             {
-                _opOperator = input.ReadValueEncodedS32();
+                OpOperator = (OperatorCode) input.ReadValueEncodedS32();
             }
             return 8;
         }
@@ -40,9 +38,9 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            if (_opFuncId == -1)
+            if (OpFuncId == -1)
             {
-                var opName = ((OperatorCode)_opOperator).ToString();
+                var opName = OpOperator.ToString();
                 int value;
                 if (int.TryParse(opName, out value))
                 {
@@ -50,7 +48,23 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
                 }
                 return "FinalFunc(" + _opFlags + "," + _opTarget + "," + opName + ")";
             }
-            return string.Format("FinalFunc({0},{1},{2})", _opFlags, _opTarget, _scripts.FuncDefs[_opFuncId].Name);
+            return string.Format("FinalFunc({0},{1},{2})", _opFlags, _opTarget, FunctionName);
         }
+
+        public string FunctionName
+        {
+            get
+            {
+                var funcDef = _scripts.FuncDefs[OpFuncId];
+                if (funcDef.ContainingClass != null)
+                {
+                    return funcDef.ContainingClass.Name + "::" + funcDef.Name;
+                }
+                return funcDef.Name;
+            }
+        }
+
+        public int OpFuncId { get; private set; }
+        public OperatorCode OpOperator { get; private set; }
     }
 }
