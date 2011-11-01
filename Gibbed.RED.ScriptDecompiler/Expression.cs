@@ -96,4 +96,36 @@ namespace Gibbed.RED.ScriptDecompiler
         }
     }
 
+    internal class CondJumpStatement: Expression
+    {
+        private readonly Expression _condition;
+        private readonly int _targetOffset;
+
+        public CondJumpStatement(Expression condition, int targetOffset)
+        {
+            _targetOffset = targetOffset;
+            _condition = condition;
+        }
+
+        public override string ToString()
+        {
+            return "unless (" + _condition + ") jump " + _targetOffset;
+        }
+    }
+
+    internal class JumpStatement: Expression
+    {
+        private readonly int _targetOffset;
+
+        public JumpStatement(int targetOffset)
+        {
+            _targetOffset = targetOffset;
+        }
+
+        public override string ToString()
+        {
+            return "jump " + _targetOffset;
+        }
+    }
+
 }

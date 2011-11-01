@@ -6,7 +6,6 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
     public class U16: IInstruction
     {
         private readonly Opcode _opcode;
-        private ushort _op0;
 
         public U16(Opcode opcode)
         {
@@ -20,7 +19,7 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public int Deserialize(Stream input)
         {
-            _op0 = input.ReadValueU16();
+            Op0 = input.ReadValueU16();
             return 2;
         }
 
@@ -31,7 +30,9 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return _opcode + "(" + _op0 + ")";
+            return _opcode + "(" + Op0 + ")";
         }
+
+        public ushort Op0 { get; private set; }
     }
 }

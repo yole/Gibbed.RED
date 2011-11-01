@@ -45,13 +45,14 @@ namespace Gibbed.RED.ScriptDecompiler
                 _currentIndex++;
                 currentInstruction = _func.Instructions[_currentIndex];
             }
-            if (currentInstruction.Opcode == Opcode.OP_Nop)
+            if (currentInstruction.Opcode == Opcode.OP_Nop || currentInstruction.Opcode == Opcode.OP_Skip)
             {
                 _currentIndex++;
                 if (_currentIndex == _func.Instructions.Count) return null;
                 currentInstruction = _func.Instructions[_currentIndex];
             }
 
+            var currentInstructionStart = _func.InstructionOffsets[_currentIndex];
             _currentIndex++;
 
             switch (currentInstruction.Opcode)
@@ -113,8 +114,13 @@ namespace Gibbed.RED.ScriptDecompiler
                             if (_incomplete) break;
                         }
                         return new CallStatement(constructor.TypeName, args);
-
                     }
+
+                case Opcode.OP_TestEqual:
+                    return ReadBinaryExpression(target, " == ", "");
+                case Opcode.OP_TestNotEqual:
+                    return ReadBinaryExpression(target, " != ", "");
+                    
                 case Opcode.OP_ObjectVar:
                 case Opcode.OP_ParamVar:
                 case Opcode.OP_LocalVar:
@@ -143,6 +149,8 @@ namespace Gibbed.RED.ScriptDecompiler
                     return new SimpleExpression("1");
                 case Opcode.OP_Null:
                     return new SimpleExpression("null");
+                case Opcode.OP_ShortConst:
+                    return new SimpleExpression(((ShortConst)currentInstruction).Value.ToString());
                 case Opcode.OP_IntConst:
                     return new SimpleExpression(((IntConst)currentInstruction).Value.ToString());
                 case Opcode.OP_FloatConst:
@@ -156,6 +164,8 @@ namespace Gibbed.RED.ScriptDecompiler
                     return ReadUnaryExpression(target, "", ".Clear()");
                 case Opcode.OP_ArraySize:
                     return ReadUnaryExpression(target, "", ".Size");
+                case Opcode.OP_ArrayResize:
+                    return ReadBinaryExpression(target, ".Resize(", ")");
                 case Opcode.OP_ArrayPushBack:
                     return ReadBinaryExpression(target, ".PushBack(", ")");
                 case Opcode.OP_ArrayRemoveFast:
@@ -193,6 +203,23 @@ namespace Gibbed.RED.ScriptDecompiler
                     }
                     break;
 
+                case Opcode.OP_ObjectToBool:
+                    return ReadNextExpression();
+                case Opcode.OP_ObjectToString:
+                    return ReadUnaryExpression(target, "", ".ToString()");
+
+                case Opcode.OP_JumpIfFalse:
+                    {
+                        var offset = currentInstructionStart + (short)((U16)currentInstruction).Op0;
+                        var condition = ReadNextExpression();
+                        return new CondJumpStatement(condition, offset);
+                    }
+
+                case Opcode.OP_Jump:
+                    {
+                        var offset = currentInstructionStart + (short)((U16)currentInstruction).Op0;
+                        return new JumpStatement(offset);
+                    }
             }
 
             _incomplete = true;
@@ -269,6 +296,22 @@ namespace Gibbed.RED.ScriptDecompiler
                 case OperatorCode.IntNotEqual:
                 case OperatorCode.FloatNotEqual:
                     return "!=";
+
+                case OperatorCode.IntLess:
+                case OperatorCode.FloatLess:
+                    return "<";
+
+                case OperatorCode.IntLessEqual:
+                case OperatorCode.FloatLessEqual:
+                    return "<=";
+
+                case OperatorCode.IntGreater:
+                case OperatorCode.FloatGreater:
+                    return ">";
+
+                case OperatorCode.IntGreaterEqual:
+                case OperatorCode.FloatGreaterEqual:
+                    return ">=";
 
                 case OperatorCode.IntAssignAdd:
                 case OperatorCode.FloatAssignAdd:
