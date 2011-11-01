@@ -5,8 +5,6 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 {
     public class ShortConst: IInstruction
     {
-        private short _value;
-
         public Opcode Opcode
         {
             get { return Opcode.OP_ShortConst; }
@@ -14,7 +12,7 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public int Deserialize(Stream input)
         {
-            _value = input.ReadValueS16();
+            Value = input.ReadValueS16();
             return 2;
         }
 
@@ -25,7 +23,9 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return "ShortConst(" + _value + ")";
+            return "ShortConst(" + Value + ")";
         }
+
+        public short Value { get; private set; }
     }
 }

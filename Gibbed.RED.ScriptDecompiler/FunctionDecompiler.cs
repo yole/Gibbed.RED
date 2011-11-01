@@ -88,16 +88,33 @@ namespace Gibbed.RED.ScriptDecompiler
                             string opName = GetOperator(finalFunc.OpOperator);
                             if (opName != null)
                             {
-                                var expression = ReadBinaryExpression(target, " " + opName + " ", "");
-                                if (CurrentInstruction.Opcode == Opcode.OP_ParamEnd)
+                                var expression = IsUnary(finalFunc.OpOperator)
+                                    ? ReadUnaryExpression(target, opName, "") 
+                                    : ReadBinaryExpression(target, " " + opName + " ", "");
+                                while (NextInstruction.Opcode != Opcode.OP_ParamEnd)
                                 {
-                                    _currentIndex++;
-                                    return expression;
+                                    var next = ReadNextExpression();
+                                    if (_incomplete) break;
+                                    expression = new BinaryExpression(target, opName, "", expression, next);
                                 }
+                                if (!_incomplete) _currentIndex++;   // skip param end
+                                return expression;
                             }
                         }
                     }
                     break;
+                case Opcode.OP_Constructor:
+                    {
+                        var constructor = (Constructor) currentInstruction;
+                        var args = new List<Expression>();
+                        for(int i=0; i<constructor.OpArgCount; i++)
+                        {
+                            args.Add(ReadNextExpression());
+                            if (_incomplete) break;
+                        }
+                        return new CallStatement(constructor.TypeName, args);
+
+                    }
                 case Opcode.OP_ObjectVar:
                 case Opcode.OP_ParamVar:
                 case Opcode.OP_LocalVar:
@@ -154,7 +171,27 @@ namespace Gibbed.RED.ScriptDecompiler
                 case Opcode.OP_NameToString:
                     return ReadUnaryExpression(target, "(string) ", "");
                 case Opcode.OP_ByteToInt:
+                    return ReadUnaryExpression(target, "(int) ", "");
+                case Opcode.OP_IntToByte:
                     return ReadUnaryExpression(target, "(byte) ", "");
+                case Opcode.OP_IntToFloat:
+                    return ReadUnaryExpression(target, "(float) ", "");
+                case Opcode.OP_EnumToInt:
+                    if (NextInstruction is ShortConst)
+                    {
+                        var typeDef = ((TypeRef) currentInstruction).TypeDef;
+                        var value = ((ShortConst) NextInstruction).Value;
+                        if (typeDef is EnumDefinition)
+                        {
+                            _currentIndex++;
+                            return new SimpleExpression(((EnumDefinition) typeDef).FindByValue(value));
+                        }
+                    }
+                    else
+                    {
+                        return ReadNextExpression();
+                    }
+                    break;
 
             }
 
@@ -165,9 +202,9 @@ namespace Gibbed.RED.ScriptDecompiler
         private List<Expression> ReadArgumentList()
         {
             var args = new List<Expression>();
-            while (CurrentInstruction.Opcode != Opcode.OP_ParamEnd)
+            while (NextInstruction.Opcode != Opcode.OP_ParamEnd)
             {
-                if (CurrentInstruction.Opcode == Opcode.OP_Nop)
+                if (NextInstruction.Opcode == Opcode.OP_Nop)
                 {
                     args.Add(new SimpleExpression("null"));
                     _currentIndex++;
@@ -185,7 +222,7 @@ namespace Gibbed.RED.ScriptDecompiler
             return args;
         }
 
-        private IInstruction CurrentInstruction
+        private IInstruction NextInstruction
         {
             get { return _func.Instructions[_currentIndex]; }
         }
@@ -213,6 +250,7 @@ namespace Gibbed.RED.ScriptDecompiler
                     return "+";
 
                 case OperatorCode.IntSubtract:
+                case OperatorCode.IntNeg:
                 case OperatorCode.FloatSubtract:
                     return "-";
 
@@ -223,6 +261,14 @@ namespace Gibbed.RED.ScriptDecompiler
                 case OperatorCode.IntDivide:
                 case OperatorCode.FloatDivide:
                     return "/";
+
+                case OperatorCode.IntEqual:
+                case OperatorCode.FloatEqual:
+                    return "==";
+
+                case OperatorCode.IntNotEqual:
+                case OperatorCode.FloatNotEqual:
+                    return "!=";
 
                 case OperatorCode.IntAssignAdd:
                 case OperatorCode.FloatAssignAdd:
@@ -245,5 +291,11 @@ namespace Gibbed.RED.ScriptDecompiler
                     return null;
             }
         }
+
+        private bool IsUnary(OperatorCode code)
+        {
+            return code == OperatorCode.BoolNot || code == OperatorCode.IntNeg;
+        }
+
     }
 }

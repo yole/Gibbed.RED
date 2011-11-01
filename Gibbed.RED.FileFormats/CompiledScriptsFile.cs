@@ -291,7 +291,7 @@ namespace Gibbed.RED.FileFormats
                 {
                     var constantName = Strings[input.ReadValueEncodedS32()].Value;
                     var constantValue = input.ReadValueEncodedS32();
-                    typeDef.Constants.Add(constantName, constantValue);
+                    typeDef.Constants.Add(new EnumDefinition.Constant(constantName, constantValue));
                 }
             }
 

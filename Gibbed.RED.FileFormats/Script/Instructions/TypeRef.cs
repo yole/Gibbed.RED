@@ -41,7 +41,12 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public string TypeName
         {
-            get { return (_typeId == -1 ? "-1" :_scripts.TypeDefs[_typeId].Name); }
+            get { return (_typeId == -1 ? "-1" : TypeDef.Name); }
+        }
+
+        public TypeDefinition TypeDef
+        {
+            get { return _scripts.TypeDefs[_typeId]; }
         }
     }
 }

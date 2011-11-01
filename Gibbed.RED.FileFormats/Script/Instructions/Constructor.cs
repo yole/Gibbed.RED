@@ -6,8 +6,7 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
     public class Constructor: IInstruction
     {
         private readonly CompiledScriptsFile _scripts;
-        private byte _op0;
-        private int _opTypeName;
+        private int _opTypeId;
 
         public Constructor(CompiledScriptsFile scripts)
         {
@@ -21,8 +20,8 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public int Deserialize(Stream input)
         {
-            _op0 = input.ReadValueU8();
-            _opTypeName = input.ReadValueEncodedS32();
+            OpArgCount = input.ReadValueU8();
+            _opTypeId = input.ReadValueEncodedS32();
             return 5;
         }
 
@@ -33,7 +32,14 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return "Constructor(" + _op0 + "," + _scripts.Strings[_opTypeName].Value + ")";
+            return "Constructor(" + OpArgCount + "," + TypeName + ")";
+        }
+
+        public byte OpArgCount { get; private set; }
+
+        public string TypeName
+        {
+            get { return _scripts.TypeDefs[_opTypeId].Name; }
         }
     }
 }

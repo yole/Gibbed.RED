@@ -26,13 +26,30 @@ namespace Gibbed.RED.FileFormats.Script
 {
     public class EnumDefinition : TypeDefinition
     {
+        public class Constant
+        {
+            public readonly string Name;
+            public readonly int Value;
+
+            public Constant(string name, int value)
+            {
+                Name = name;
+                Value = value;
+            }
+        }
+
         public int Unknown0;
-        public Dictionary<string, int> Constants
-            = new Dictionary<string, int>();
+        public List<Constant> Constants = new List<Constant>();
 
         public override string ToString()
         {
             return "EnumDefinition: " + Name;
+        }
+
+        public string FindByValue(int value)
+        {
+            var constant = Constants.Find(c => c.Value == value);
+            return constant != null ? constant.Name : null;
         }
     }
 }

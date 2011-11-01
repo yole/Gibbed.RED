@@ -29,7 +29,22 @@ namespace Gibbed.RED.ScriptDecompiler
                 {
                     DecompileClass((ClassDefinition) typedef, Console.Out);
                 }
+                else if (typedef is EnumDefinition)
+                {
+                    DecompileEnum((EnumDefinition) typedef, Console.Out);
+                }
             }
+        }
+
+        private static void DecompileEnum(EnumDefinition typedef, TextWriter output)
+        {
+            output.WriteLine("enum " + typedef.Name);
+            output.WriteLine("{");
+            foreach (var constant in typedef.Constants)
+            {
+                output.WriteLine("    " + constant.Name + " = " + constant.Value + ",");
+            }
+            output.WriteLine("}\n");
         }
 
         private static void DecompileClass(ClassDefinition typedef, TextWriter output)
