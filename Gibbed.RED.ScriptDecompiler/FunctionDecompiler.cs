@@ -76,6 +76,12 @@ namespace Gibbed.RED.ScriptDecompiler
                         var args = ReadArgumentList();
                         return new CallStatement(virtualFunc.FunctionName, args);
                     }
+                case Opcode.OP_EntryFunc:
+                    {
+                        var virtualFunc = (U16S32)currentInstruction;
+                        var args = ReadArgumentList();
+                        return new CallStatement("Enter " + virtualFunc.Operand, args);
+                    }
                 case Opcode.OP_FinalFunc:
                     {
                         var finalFunc = (FinalFunc) currentInstruction;
@@ -115,6 +121,11 @@ namespace Gibbed.RED.ScriptDecompiler
                         }
                         return new CallStatement(constructor.TypeName, args);
                     }
+                case Opcode.OP_New:
+                    {
+                        var newRef = (TypeRef) currentInstruction;
+                        return ReadUnaryExpression("new " + newRef.TypeName + "(", ")");
+                    }
 
                 case Opcode.OP_TestEqual:
                     return ReadBinaryExpression(" == ", "");
@@ -138,6 +149,11 @@ namespace Gibbed.RED.ScriptDecompiler
                     return new SimpleExpression("Sound");
                 case Opcode.OP_GetCamera:
                     return new SimpleExpression("Camera");
+
+                case Opcode.OP_This:
+                    return new SimpleExpression("this");
+                case Opcode.OP_Parent:
+                    return ReadUnaryExpression("Parent(", ")");
 
                 case Opcode.OP_BoolFalse:
                     return new SimpleExpression("false");
@@ -170,8 +186,14 @@ namespace Gibbed.RED.ScriptDecompiler
                     return ReadBinaryExpression(".PushBack(", ")");
                 case Opcode.OP_ArrayRemoveFast:
                     return ReadBinaryExpression(".RemoveFast(", ")");
+                case Opcode.OP_ArrayContains:
+                    return ReadBinaryExpression(".Contains(", ")");
                 case Opcode.OP_ArrayContainsFast:
                     return ReadBinaryExpression(".ContainsFast(", ")");
+                case Opcode.OP_ArrayErase:
+                    return ReadBinaryExpression(".Erase(", ")");
+                case Opcode.OP_ArrayInsert:
+                    return ReadTernaryExpression("Insert");
                 case Opcode.OP_ArrayElement:
                     return ReadBinaryExpression("[", "]");
 
@@ -180,8 +202,10 @@ namespace Gibbed.RED.ScriptDecompiler
 
                 case Opcode.OP_NameToString:
                 case Opcode.OP_IntToString:
+                case Opcode.OP_FloatToString:
                     return ReadUnaryExpression("(string) ", "");
                 case Opcode.OP_ByteToInt:
+                case Opcode.OP_FloatToInt:
                     return ReadUnaryExpression("(int) ", "");
                 case Opcode.OP_IntToByte:
                     return ReadUnaryExpression("(byte) ", "");
@@ -268,7 +292,18 @@ namespace Gibbed.RED.ScriptDecompiler
             return new BinaryExpression(infix, suffix, lhs, rhs);
         }
 
-        private string GetOperator(OperatorCode code)
+        private Expression ReadTernaryExpression(string functionName)
+        {
+            var lhs = ReadNextExpression();
+            var op1 = _incomplete ? null : ReadNextExpression();
+            var op2 = _incomplete ? null : ReadNextExpression();
+            var args = new List<Expression>();
+            args.Add(op1);
+            args.Add(op2);
+            return new CallStatement(lhs + "." + functionName, args);
+        }
+
+        private static string GetOperator(OperatorCode code)
         {
             switch (code)
             {
@@ -280,6 +315,7 @@ namespace Gibbed.RED.ScriptDecompiler
                 case OperatorCode.IntSubtract:
                 case OperatorCode.IntNeg:
                 case OperatorCode.FloatSubtract:
+                case OperatorCode.FloatNeg:
                     return "-";
 
                 case OperatorCode.IntMultiply:
@@ -322,6 +358,9 @@ namespace Gibbed.RED.ScriptDecompiler
                 case OperatorCode.FloatAssignSubtract:
                     return "-=";
 
+                case OperatorCode.FloatAssignMultiply:
+                    return "*=";
+
                 case OperatorCode.BoolAnd:
                     return "&&";
 
@@ -331,14 +370,41 @@ namespace Gibbed.RED.ScriptDecompiler
                 case OperatorCode.BoolNot:
                     return "!";
 
+                case OperatorCode.FloatOp25:
+                    return "<op25>";
+
+                case OperatorCode.VectorOp60:
+                    return "<op60>";
+
+                case OperatorCode.VectorOp62:
+                    return "<op62>";
+
+                case OperatorCode.VectorOp71:
+                    return "<op71>";
+
+                case OperatorCode.TimeOp80:
+                    return "<op80>";
+
+                case OperatorCode.TimeOp81:
+                    return "<op81>";
+
+                case OperatorCode.TimeOp94:
+                    return "<op94>";
+
+                case OperatorCode.TimeOp96:
+                    return "<op96>";
+
                 default:
                     return null;
             }
         }
 
-        private bool IsUnary(OperatorCode code)
+        private static bool IsUnary(OperatorCode code)
         {
-            return code == OperatorCode.BoolNot || code == OperatorCode.IntNeg;
+            return code == OperatorCode.BoolNot ||
+                   code == OperatorCode.IntNeg ||
+                   code == OperatorCode.FloatNeg ||
+                   code == OperatorCode.VectorOp60;
         }
 
     }

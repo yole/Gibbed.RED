@@ -20,6 +20,8 @@
         FloatSubtract = 22,
         FloatMultiply = 23,
         FloatDivide = 24,
+        FloatOp25 = 25,
+        FloatNeg = 26,
         FloatEqual = 27,
         FloatNotEqual = 28,
         FloatLess = 29,
@@ -28,8 +30,16 @@
         FloatGreaterEqual = 32,
         FloatAssignAdd = 33,
         FloatAssignSubtract = 34,
+        FloatAssignMultiply = 35,
         BoolAnd = 57,
         BoolOr = 58,
         BoolNot = 59,
+        VectorOp60 = 60,
+        VectorOp62 = 62,
+        VectorOp71 = 71,
+        TimeOp80 = 80,
+        TimeOp81 = 81,
+        TimeOp94 = 94,
+        TimeOp96 = 96
     }
 }

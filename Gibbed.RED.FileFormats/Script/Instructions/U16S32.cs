@@ -35,7 +35,12 @@ namespace Gibbed.RED.FileFormats.Script.Instructions
 
         public override string ToString()
         {
-            return _opcode + "(" + _op0 + "," + _scripts.Strings[_op1].Value + ")";
+            return _opcode + "(" + _op0 + "," + Operand + ")";
+        }
+
+        public string Operand
+        {
+            get { return _scripts.Strings[_op1].Value; }
         }
     }
 }
