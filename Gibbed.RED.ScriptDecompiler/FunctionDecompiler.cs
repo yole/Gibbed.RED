@@ -58,18 +58,18 @@ namespace Gibbed.RED.ScriptDecompiler
             switch (currentInstruction.Opcode)
             {
                 case Opcode.OP_Assign:
-                    return ReadBinaryExpression(target, " = ", "");
+                    return ReadBinaryExpression(" = ", "");
                 case Opcode.OP_Context:
                     {
                         var context = (U16U16)currentInstruction;
                         if (context.Op0 == 0)
                         {
-                            return ReadBinaryExpression(target, ".", "");
+                            return ReadBinaryExpression(".", "");
                         }
                     }
                     break;
                 case Opcode.OP_Return:
-                    return ReadUnaryExpression(target, "return ", "");
+                    return ReadUnaryExpression("return ", "");
                 case Opcode.OP_VirtualFunc:
                     {
                         var virtualFunc = (VirtualFunc)currentInstruction;
@@ -90,13 +90,13 @@ namespace Gibbed.RED.ScriptDecompiler
                             if (opName != null)
                             {
                                 var expression = IsUnary(finalFunc.OpOperator)
-                                    ? ReadUnaryExpression(target, opName, "") 
-                                    : ReadBinaryExpression(target, " " + opName + " ", "");
+                                    ? ReadUnaryExpression(opName, "") 
+                                    : ReadBinaryExpression(" " + opName + " ", "");
                                 while (NextInstruction.Opcode != Opcode.OP_ParamEnd)
                                 {
                                     var next = ReadNextExpression();
                                     if (_incomplete) break;
-                                    expression = new BinaryExpression(target, opName, "", expression, next);
+                                    expression = new BinaryExpression(opName, "", expression, next);
                                 }
                                 if (!_incomplete) _currentIndex++;   // skip param end
                                 return expression;
@@ -117,16 +117,16 @@ namespace Gibbed.RED.ScriptDecompiler
                     }
 
                 case Opcode.OP_TestEqual:
-                    return ReadBinaryExpression(target, " == ", "");
+                    return ReadBinaryExpression(" == ", "");
                 case Opcode.OP_TestNotEqual:
-                    return ReadBinaryExpression(target, " != ", "");
+                    return ReadBinaryExpression(" != ", "");
                     
                 case Opcode.OP_ObjectVar:
                 case Opcode.OP_ParamVar:
                 case Opcode.OP_LocalVar:
                     return new SimpleExpression(((TypeMember)currentInstruction).MemberName);
                 case Opcode.OP_StructMember:
-                    return ReadUnaryExpression(target, "", "." + (((TypeMember) currentInstruction).MemberName));
+                    return ReadUnaryExpression("", "." + (((TypeMember) currentInstruction).MemberName));
                 
                 case Opcode.OP_GetPlayer:
                     return new SimpleExpression("Player");
@@ -161,31 +161,32 @@ namespace Gibbed.RED.ScriptDecompiler
                     return new SimpleExpression("'" + ((NameConst)currentInstruction).Value + "'");
                 
                 case Opcode.OP_ArrayClear:
-                    return ReadUnaryExpression(target, "", ".Clear()");
+                    return ReadUnaryExpression("", ".Clear()");
                 case Opcode.OP_ArraySize:
-                    return ReadUnaryExpression(target, "", ".Size");
+                    return ReadUnaryExpression("", ".Size");
                 case Opcode.OP_ArrayResize:
-                    return ReadBinaryExpression(target, ".Resize(", ")");
+                    return ReadBinaryExpression(".Resize(", ")");
                 case Opcode.OP_ArrayPushBack:
-                    return ReadBinaryExpression(target, ".PushBack(", ")");
+                    return ReadBinaryExpression(".PushBack(", ")");
                 case Opcode.OP_ArrayRemoveFast:
-                    return ReadBinaryExpression(target, ".RemoveFast(", ")");
+                    return ReadBinaryExpression(".RemoveFast(", ")");
                 case Opcode.OP_ArrayContainsFast:
-                    return ReadBinaryExpression(target, ".ContainsFast(", ")");
+                    return ReadBinaryExpression(".ContainsFast(", ")");
                 case Opcode.OP_ArrayElement:
-                    return ReadBinaryExpression(target, "[", "]");
+                    return ReadBinaryExpression("[", "]");
 
                 case Opcode.OP_DynamicCast:
-                    return ReadUnaryExpression(target, "dynamic_cast<" + ((TypeRef) currentInstruction).TypeName + ">(", ")");
+                    return ReadUnaryExpression("dynamic_cast<" + ((TypeRef) currentInstruction).TypeName + ">(", ")");
 
                 case Opcode.OP_NameToString:
-                    return ReadUnaryExpression(target, "(string) ", "");
+                case Opcode.OP_IntToString:
+                    return ReadUnaryExpression("(string) ", "");
                 case Opcode.OP_ByteToInt:
-                    return ReadUnaryExpression(target, "(int) ", "");
+                    return ReadUnaryExpression("(int) ", "");
                 case Opcode.OP_IntToByte:
-                    return ReadUnaryExpression(target, "(byte) ", "");
+                    return ReadUnaryExpression("(byte) ", "");
                 case Opcode.OP_IntToFloat:
-                    return ReadUnaryExpression(target, "(float) ", "");
+                    return ReadUnaryExpression("(float) ", "");
                 case Opcode.OP_EnumToInt:
                     if (NextInstruction is ShortConst)
                     {
@@ -206,7 +207,7 @@ namespace Gibbed.RED.ScriptDecompiler
                 case Opcode.OP_ObjectToBool:
                     return ReadNextExpression();
                 case Opcode.OP_ObjectToString:
-                    return ReadUnaryExpression(target, "", ".ToString()");
+                    return ReadUnaryExpression("", ".ToString()");
 
                 case Opcode.OP_JumpIfFalse:
                     {
@@ -254,17 +255,17 @@ namespace Gibbed.RED.ScriptDecompiler
             get { return _func.Instructions[_currentIndex]; }
         }
 
-        private Expression ReadUnaryExpression(int target, string prefix, string suffix)
+        private Expression ReadUnaryExpression(string prefix, string suffix)
         {
             var operand = ReadNextExpression();
-            return new UnaryExpression(target, operand, prefix, suffix);
+            return new UnaryExpression(operand, prefix, suffix);
         }
 
-        private Expression ReadBinaryExpression(int target, string infix, string suffix)
+        private Expression ReadBinaryExpression(string infix, string suffix)
         {
             var lhs = ReadNextExpression();
             var rhs = _incomplete ? null : ReadNextExpression();
-            return new BinaryExpression(target, infix, suffix, lhs, rhs);
+            return new BinaryExpression(infix, suffix, lhs, rhs);
         }
 
         private string GetOperator(OperatorCode code)

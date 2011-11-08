@@ -46,7 +46,7 @@ namespace Gibbed.RED.ScriptDecompiler
         private readonly string _infix;
         private readonly string _suffix;
 
-        public BinaryExpression(int target, string infix, string suffix, Expression lhs, Expression rhs)
+        public BinaryExpression(string infix, string suffix, Expression lhs, Expression rhs)
         {
             _infix = infix;
             _suffix = suffix;
@@ -66,7 +66,7 @@ namespace Gibbed.RED.ScriptDecompiler
         private readonly string _prefix;
         private readonly string _suffix;
 
-        public UnaryExpression(int target, Expression operand, string prefix, string suffix)
+        public UnaryExpression(Expression operand, string prefix, string suffix)
         {
             _operand = operand;
             _prefix = prefix;
