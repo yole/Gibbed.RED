@@ -34,6 +34,14 @@ namespace Gibbed.RED.ScriptDecompiler
                     DecompileEnum((EnumDefinition) typedef, Console.Out);
                 }
             }
+
+            foreach (var func in scriptFile.FuncDefs)
+            {
+                if (func.ContainingClass == null)
+                {
+                    DecompileFunction(func, Console.Out, "");
+                }
+            }
         }
 
         private static void DecompileEnum(EnumDefinition typedef, TextWriter output)
