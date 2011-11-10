@@ -17,6 +17,7 @@
         IntGreaterEqual = 13,
         IntAssignAdd = 14,
         IntAssignSubtract = 15,
+        IntAssignMultiply = 16,
         IntAssignOr = 19,
         StringAdd = 20,
         FloatAdd = 21,

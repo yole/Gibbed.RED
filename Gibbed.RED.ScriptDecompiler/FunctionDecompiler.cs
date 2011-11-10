@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Gibbed.RED.FileFormats.Script;
 using Gibbed.RED.FileFormats.Script.Instructions;
 
@@ -16,32 +17,192 @@ namespace Gibbed.RED.ScriptDecompiler
             _currentIndex = 0;
         }
 
-        public List<Expression> DecompileStatements()
+        public List<Statement> DecompileStatements()
         {
-            var result = new List<Expression>();
+            var result = new List<ExpressionStatement>();
             _currentIndex = 0;
             while (_currentIndex < _func.Instructions.Count)
             {
-                var statement = ReadNextExpression(false);
-                if (statement == null)
-                    break;
-                result.Add(statement);
+                var offset = _func.InstructionOffsets[_currentIndex];
+                var expression = ReadNextExpression(false);
+                result.Add(new ExpressionStatement(expression, offset));
                 if (_incomplete)
                 {
                     break;
                 }
             }
-            return result;
+            return RestoreControlFlow(result);
+        }
+
+        private List<Statement> RestoreControlFlow(List<ExpressionStatement> statements)
+        {
+            MarkTargetStatements(statements);
+            var blocks = BuildBasicBlocks(statements);
+            MarkJumpTargets(blocks);
+            RemoveRedundantBlocks(blocks);
+
+            int i = 0;
+            while(i < blocks.Count)
+            {
+                var block = blocks[i];
+                if (block.Predecessors.Count == 1 && block.Successors.Count == 2)
+                {
+                    var thenBlock = block.Successors[0];
+                    var nextBlock = block.Successors[1];
+                    var condition = block.Condition;
+                    if (condition != null &&
+                        thenBlock.Predecessors.Count == 1 && thenBlock.Successors.Count == 1)
+                    {
+                        if (nextBlock.HasPredecessors(block, thenBlock))
+                        {
+                            block.RemoveSelf();
+                            thenBlock.RemoveSelf();
+                            var ifBlock = new ControlStatement(block.Predecessors[0], "if (" + condition + ")", thenBlock);
+                            ifBlock.AddSuccessor(nextBlock);
+                            blocks.Remove(block);
+                            blocks.Remove(thenBlock);
+                            blocks.Insert(i, ifBlock);
+                            continue;
+                        }
+                        var jumpBlock = thenBlock.Successors[0];
+                        var elseBlock = nextBlock;
+                        if (jumpBlock.Successors.Count == 1)
+                        {
+                            nextBlock = jumpBlock.Successors[0];
+                            if (nextBlock.HasPredecessors(jumpBlock, elseBlock))
+                            {
+                                block.RemoveSelf();
+                                thenBlock.RemoveSelf();
+                                jumpBlock.RemoveSelf();
+                                elseBlock.RemoveSelf();
+                                var ifStmt = new ControlStatement(block.Predecessors[0], "if (" + condition + ")",
+                                                                   thenBlock);
+                                var elseStmt = new ControlStatement(ifStmt, "else", elseBlock);
+                                elseStmt.AddSuccessor(nextBlock);
+                                blocks.Remove(block);
+                                blocks.Remove(thenBlock);
+                                blocks.Remove(jumpBlock);
+                                blocks.Remove(elseBlock);
+                                blocks.Insert(i, ifStmt);
+                                blocks.Insert(i+1, elseStmt);
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                if (block.Predecessors.Count == 2 && block.Successors.Count == 2)
+                {
+                    var loopBody = block.Successors[0];
+                    var loopEnd = block.Successors[1];
+                    var condition = block.Condition;
+                    if (condition != null &&
+                        loopBody.Predecessors.Count == 1 && loopBody.Successors.Count == 1 && 
+                        loopEnd.Predecessors.Count == 1)
+                    {
+                        var loopJump = loopBody.Successors[0];
+                        if (loopJump.HasSuccessors(block))
+                        {
+                            block.RemoveSelf();
+                            loopBody.RemoveSelf();
+                            loopJump.RemoveSelf();
+                            var whileBlock = new ControlStatement(block.Predecessors[0], "while (" + condition + ")", loopBody);
+                            whileBlock.AddSuccessor(loopEnd);
+                            blocks.Remove(block);
+                            blocks.Remove(loopBody);
+                            blocks.Remove(loopJump);
+                            blocks.Insert(i, whileBlock);
+
+                        }
+                    }
+                }
+                i++;
+
+
+            }
+
+            if (IsControlFlowBuilt(blocks))
+            {
+                blocks.ForEach(block => block.ControlFlowDone = true);
+            }
+
+            return new List<Statement>(blocks);
+
+        }
+
+        private bool IsControlFlowBuilt(List<BasicBlockStatement> blocks)
+        {
+            return blocks.TrueForAll(block => block.Successors.Count <= 1 && block.Predecessors.Count <= 1);
+        }
+
+        private static void MarkTargetStatements(List<ExpressionStatement> statements)
+        {
+            foreach (var statement in statements)
+            {
+                if (statement.Expression is JumpExpression)
+                {
+                    var jump = statement.Expression as JumpExpression;
+                    var target = statements.Find(s => s.Offset == jump.TargetOffset);
+                    target.IsTarget = true;
+                }
+            }
+        }
+
+        private static List<BasicBlockStatement> BuildBasicBlocks(List<ExpressionStatement> statements)
+        {
+            var blocks = new List<BasicBlockStatement>();
+            var currentBlock = new BasicBlockStatement(null);
+            blocks.Add(currentBlock);
+            foreach (var statement in statements)
+            {
+                if (statement.IsTarget || statement.Expression is JumpExpression)
+                {
+                    currentBlock = new BasicBlockStatement(currentBlock);
+                    blocks.Add(currentBlock);
+                }
+                currentBlock.Add(statement);
+                if (statement.Expression is JumpExpression)
+                {
+                    currentBlock = new BasicBlockStatement(statement.Expression is CondJumpExpression ? currentBlock : null);
+                    blocks.Add(currentBlock);
+                }
+            }
+            return blocks;
+        }
+
+        private static void MarkJumpTargets(List<BasicBlockStatement> blocks)
+        {
+            foreach (BasicBlockStatement basicBlock in blocks)
+            {
+                int target = basicBlock.GetJumpTarget();
+                if (target != -1)
+                {
+                    basicBlock.AddSuccessor(blocks.Find(block => block.StartOffset == target));
+                }
+            }
+        }
+
+        private static void RemoveRedundantBlocks(List<BasicBlockStatement> blocks)
+        {
+            int i = 1;
+            while(i < blocks.Count)
+            {
+                var block = blocks[i];
+                if (block.Predecessors.Count == 0)
+                {
+                    block.RemoveSelf();
+                    blocks.RemoveAt(i);
+                    continue;
+                }
+                i++;
+            }
         }
 
         private Expression ReadNextExpression(bool allowNop)
         {
-            int target = -1;
-
             var currentInstruction = _func.Instructions[_currentIndex];
             if (currentInstruction is Target)
             {
-                target = ((Target)currentInstruction).Op0;
                 _currentIndex++;
                 currentInstruction = _func.Instructions[_currentIndex];
             }
@@ -53,12 +214,11 @@ namespace Gibbed.RED.ScriptDecompiler
             if (currentInstruction.Opcode == Opcode.OP_Nop || currentInstruction.Opcode == Opcode.OP_Skip)
             {
                 _currentIndex++;
-                if (_currentIndex == _func.Instructions.Count) return null;
-                currentInstruction = _func.Instructions[_currentIndex];
+                return null;
             }
 
-            var currentInstructionStart = _func.InstructionOffsets[_currentIndex];
             _currentIndex++;
+            var nextInstructionStart = _func.InstructionOffsets[_currentIndex];
 
             switch (currentInstruction.Opcode)
             {
@@ -254,16 +414,25 @@ namespace Gibbed.RED.ScriptDecompiler
 
                 case Opcode.OP_JumpIfFalse:
                     {
-                        var offset = currentInstructionStart + (short)((U16)currentInstruction).Op0;
+                        var offset = nextInstructionStart + (short)((U16)currentInstruction).Op0;
                         var condition = ReadNextExpression(false);
-                        return new CondJumpStatement(condition, offset);
+                        return new CondJumpExpression(condition, offset);
                     }
 
                 case Opcode.OP_Jump:
                     {
-                        var offset = currentInstructionStart + (short)((U16)currentInstruction).Op0;
-                        return new JumpStatement(offset);
+                        var offset = nextInstructionStart + (short)((U16)currentInstruction).Op0;
+                        return new JumpExpression(offset);
                     }
+
+                case Opcode.OP_Switch:
+                    return ReadUnaryExpression("switch(", ")");
+
+                case Opcode.OP_SwitchLabel:
+                    return ReadUnaryExpression("case ", ":");
+
+                case Opcode.OP_SwitchDefault:
+                    return new SimpleExpression("default:");
             }
 
             _incomplete = true;
@@ -373,6 +542,7 @@ namespace Gibbed.RED.ScriptDecompiler
                 case OperatorCode.FloatAssignSubtract:
                     return "-=";
 
+                case OperatorCode.IntAssignMultiply:
                 case OperatorCode.FloatAssignMultiply:
                     return "*=";
 

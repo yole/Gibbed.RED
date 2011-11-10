@@ -91,7 +91,7 @@ namespace Gibbed.RED.ScriptDecompiler
             var statements = decompiler.DecompileStatements();
             foreach(var statement in statements)
             {
-                output.WriteLine(indent + "    " + statement + ";");
+                statement.Write(output, indent + "    ");
             }
  
             output.WriteLine(indent + "}\n");
