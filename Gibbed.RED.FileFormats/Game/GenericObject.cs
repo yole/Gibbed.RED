@@ -97,6 +97,11 @@ namespace Gibbed.RED.FileFormats.Game
             _propertyValues.Add(name, new PropertyValue(type, value));
         }
 
+        public object GetPropertyValue(string name)
+        {
+            return _propertyValues[name].Value;
+        }
+
         public ICollection<string> PropertyValues
         {
             get { return _propertyValues.Keys; }

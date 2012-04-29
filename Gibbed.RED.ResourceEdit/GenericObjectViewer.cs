@@ -29,9 +29,24 @@ namespace Gibbed.RED.ResourceEdit
                 foreach (string name in data.PropertyValues)
                 {
                     var item = new ListViewItem(name);
-                    item.SubItems.Add(data.GetDataType(name));
-                    item.SubItems.Add(data.GetPropertyValueAsString(name, _explorer.StringsFile));
+                    var dataType = data.GetDataType(name);
+                    item.SubItems.Add(dataType);
+                    var isArray = dataType.StartsWith("@") && !dataType.StartsWith("@*");
+                    item.SubItems.Add(isArray ? "" : data.GetPropertyValueAsString(name, _explorer.StringsFile));
                     listView1.Items.Add(item);
+
+                    if (isArray)
+                    {
+                        var items = (List<object>) data.GetPropertyValue(name);
+                        for(int i=0; i<items.Count; i++)
+                        {
+                            var childItem = new ListViewItem("[" + i + "]");
+                            childItem.SubItems.Add(dataType.Substring(1));
+                            childItem.SubItems.Add(items[i].ToString());
+                            childItem.IndentCount = 1;
+                            listView1.Items.Add(childItem);
+                        }
+                    }
                 }
                 if (data.UndecodedData != null)
                 {
