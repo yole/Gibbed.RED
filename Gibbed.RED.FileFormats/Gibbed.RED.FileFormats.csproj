@@ -53,6 +53,7 @@
     <Compile Include="Game\CEntityBodyPartState.cs" />
     <Compile Include="Game\CEntityColorVariant.cs" />
     <Compile Include="Game\CEntityTemplate.cs" />
+    <Compile Include="Game\CFootstepData.cs" />
     <Compile Include="Game\CGameplayEntity.cs" />
     <Compile Include="Game\CMaterialGraph.cs" />
     <Compile Include="Game\CMesh.cs" />
