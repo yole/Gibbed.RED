@@ -59,28 +59,7 @@ namespace Gibbed.RED.Test
                 {
                     var funcDef = test.FuncDefs[index];
                     Console.WriteLine(index + ". " + funcDef);
-                    if (funcDef.Instructions != null)
-                    {
-                        Console.WriteLine("{");
-                        foreach (var local in funcDef.Locals)
-                        {
-                            Console.WriteLine("    " + local);
-                        }
-                        if (funcDef.Locals.Count > 0)
-                        {
-                            Console.WriteLine();
-                        }
-                        for (int i = 0; i < funcDef.Instructions.Count; i++)
-                        {
-                            var instruction = funcDef.Instructions[i];
-                            if (instruction is Target)
-                            {
-                                Console.WriteLine("");
-                            }
-                            Console.WriteLine("    {0:D4} {1}", funcDef.InstructionOffsets[i], instruction);
-                        }
-                        Console.WriteLine("}\n");
-                    }
+                    funcDef.DisassembleToConsole();
                 }
             }
         }

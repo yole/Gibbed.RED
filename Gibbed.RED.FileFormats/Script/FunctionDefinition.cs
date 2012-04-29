@@ -20,8 +20,11 @@
  *    distribution.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using Gibbed.RED.FileFormats.Script.Instructions;
 
 namespace Gibbed.RED.FileFormats.Script
 {
@@ -67,6 +70,52 @@ namespace Gibbed.RED.FileFormats.Script
             }
             result.Append(")");
             return result.ToString();
+        }
+
+        public override bool Equals(object obj)
+        {
+            var rhs = obj as FunctionDefinition;
+            if (rhs == null) return false;
+            if (Instructions == null)
+            {
+                return rhs.Instructions == null;
+            }
+            if (rhs.Instructions == null)
+            {
+                return false;
+            }
+            if (Instructions.Count != rhs.Instructions.Count)
+            {
+                return false;
+            }
+            return !Instructions.Where((t, i) => t.Opcode != rhs.Instructions[i].Opcode).Any();
+            // TODO check operands
+        }
+
+        public void DisassembleToConsole()
+        {
+            if (Instructions != null)
+            {
+                Console.WriteLine("{");
+                foreach (var local in Locals)
+                {
+                    Console.WriteLine("    " + local);
+                }
+                if (Locals.Count > 0)
+                {
+                    Console.WriteLine();
+                }
+                for (int i = 0; i < Instructions.Count; i++)
+                {
+                    var instruction = Instructions[i];
+                    if (instruction is Target)
+                    {
+                        Console.WriteLine("");
+                    }
+                    Console.WriteLine("    {0:D4} {1}", InstructionOffsets[i], instruction);
+                }
+                Console.WriteLine("}\n");
+            }
         }
     }
 }
