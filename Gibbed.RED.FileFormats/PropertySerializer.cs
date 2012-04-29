@@ -137,6 +137,7 @@ namespace Gibbed.RED.FileFormats
                 case "LocalizedString": return new LocalizedStringSerializer();
                 case "TagList": return new TagListSerializer();
                 case "CVariant": return new CVariantSerializer();
+                case "CGUID": return new GuidSerializer();
                 default: return null;
             }
         }
