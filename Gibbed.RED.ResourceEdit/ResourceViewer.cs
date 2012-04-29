@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 using Gibbed.RED.FileFormats.Game;
+using Gibbed.RED.FileFormats.Resource;
 
 namespace Gibbed.RED.ResourceEdit
 {
@@ -77,7 +78,7 @@ namespace Gibbed.RED.ResourceEdit
             {
                 var obj = queue.Dequeue();
 
-                var node = new TreeNode(obj.TypeName);
+                var node = new TreeNode(GetDisplayName(obj));
 
                 if (this.entryTreeView.ImageList.Images.ContainsKey(obj.TypeName) == true)
                 {
@@ -118,6 +119,16 @@ namespace Gibbed.RED.ResourceEdit
             this.entryTreeView.Nodes.Add(root);
             root.Expand();
             this.entryTreeView.EndUpdate();
+        }
+
+        private static string GetDisplayName(ObjectInfo obj)
+        {
+            var genericObject = obj.Data as GenericObject;
+            if (genericObject != null)
+            {
+                return genericObject.GetDisplayName(true);
+            }
+            return obj.TypeName;
         }
 
         private void OpenObject(TreeNode node)

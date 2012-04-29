@@ -42,7 +42,7 @@ namespace Gibbed.RED.FileFormats.Game
                 }
                 if (_value is GenericObject)
                 {
-                    return "{" + ((GenericObject) _value).Type + "}";
+                    return "{" + ((GenericObject) _value).GetDisplayName(false) + "}";
                 }
                 return _value.ToString();
             }
@@ -99,6 +99,28 @@ namespace Gibbed.RED.FileFormats.Game
         public ICollection<string> PropertyValues
         {
             get { return _propertyValues.Keys; }
+        }
+
+        public string GetDisplayName(bool includeUndecoded)
+        {
+            string namePropertyValue = "";
+            foreach (var val in _propertyValues)
+            {
+                if (val.Key.ToLowerInvariant().Contains("name") && val.Value.Value is string)
+                {
+                    namePropertyValue = (string) val.Value.Value;
+                    break;
+                }
+            }
+            if (includeUndecoded && UndecodedData != null)
+            {
+                if (namePropertyValue.Length > 0)
+                {
+                    namePropertyValue += " ";
+                }
+                namePropertyValue += "<" + UndecodedData.Length + " undecoded>";
+            }
+            return namePropertyValue.Length > 0 ? Type + ": " + namePropertyValue : Type;
         }
 
         public string GetPropertyValueAsString(string name, StringsFile stringsFile)
