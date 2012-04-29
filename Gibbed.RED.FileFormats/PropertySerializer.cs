@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Gibbed.RED.FileFormats.Game;
 using Gibbed.RED.FileFormats.Serializers;
 
@@ -38,7 +39,7 @@ namespace Gibbed.RED.FileFormats
                     string name = null;
                     stream.SerializeName(ref name);
 
-                    if (string.IsNullOrEmpty(name) == true ||
+                    if (String.IsNullOrEmpty(name) == true ||
                         name == "None")
                     {
                         break;
@@ -104,7 +105,7 @@ namespace Gibbed.RED.FileFormats
             }
         }
 
-        private static IPropertySerializer GetSerializer(string type)
+        public static IPropertySerializer GetSerializer(string type)
         {
             if (type.StartsWith("@"))
             {
@@ -135,6 +136,7 @@ namespace Gibbed.RED.FileFormats
                 case "CName": return new CNameSerializer();
                 case "LocalizedString": return new LocalizedStringSerializer();
                 case "TagList": return new TagListSerializer();
+                case "CVariant": return new CVariantSerializer();
                 default: return null;
             }
         }
@@ -182,7 +184,7 @@ namespace Gibbed.RED.FileFormats
 
             if (info.Properties.ContainsKey(propertyName) == false)
             {
-                throw new FormatException(string.Format(
+                throw new FormatException(String.Format(
                     "{0} does not contain a property '{1}' ({2})",
                     type, propertyName, typeName));
             }
@@ -230,7 +232,7 @@ namespace Gibbed.RED.FileFormats
                             info.Description = ((PropertyDescriptionAttribute)descAttributes[0]).Description;
                         }
 
-                        if (string.IsNullOrEmpty(info.Name) == true ||
+                        if (String.IsNullOrEmpty(info.Name) == true ||
                             info.Serializer == null)
                         {
                             throw new InvalidOperationException();
@@ -247,7 +249,7 @@ namespace Gibbed.RED.FileFormats
             public string Name;
             public string Description;
             public Type Serializer;
-            public System.Reflection.PropertyInfo PropertyInfo;
+            public PropertyInfo PropertyInfo;
         }
     }
 }

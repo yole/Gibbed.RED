@@ -124,6 +124,7 @@
     <Compile Include="Serializers\ArraySerializer.cs" />
     <Compile Include="Serializers\BoolSerializer.cs" />
     <Compile Include="Serializers\CNameSerializer.cs" />
+    <Compile Include="Serializers\CVariantSerializer.cs" />
     <Compile Include="Serializers\EngineTransformSerializer.cs" />
     <Compile Include="Serializers\GuidSerializer.cs" />
     <Compile Include="Serializers\Int8Serializer.cs" />

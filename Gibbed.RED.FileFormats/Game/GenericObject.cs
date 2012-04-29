@@ -78,7 +78,7 @@ namespace Gibbed.RED.FileFormats.Game
         private byte _objectUnknown;
         public byte[] UndecodedData { get; set; }
 
-        public void Serialize(IFileStream stream)
+        public virtual void Serialize(IFileStream stream)
         {
             if (stream.Mode == SerializeMode.Reading)
             {
