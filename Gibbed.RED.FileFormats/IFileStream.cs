@@ -50,5 +50,6 @@ namespace Gibbed.RED.FileFormats
             where TType : IFileObject, new();
         void SerializePointer(ref IFileObject value);
         void SerializePointer(ref List<IFileObject> value, bool encoded);
+        void SerializeDependency(ref string value);
     }
 }

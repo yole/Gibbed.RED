@@ -138,6 +138,7 @@
     <Compile Include="Serializers\StringSerializer.cs" />
     <Compile Include="Serializers\StructureSerializer.cs" />
     <Compile Include="Serializers\TagListSerializer.cs" />
+    <Compile Include="Serializers\DependencySerializer.cs" />
     <Compile Include="Serializers\Uint16Serializer.cs" />
     <Compile Include="Serializers\Uint8Serializer.cs" />
     <Compile Include="Serializers\UintSerializer.cs" />

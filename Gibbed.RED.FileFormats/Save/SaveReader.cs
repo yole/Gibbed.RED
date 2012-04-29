@@ -466,6 +466,12 @@ namespace Gibbed.RED.FileFormats.Save
         {
             throw new NotSupportedException();
         }
+
+        public void SerializeDependency(ref string value)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

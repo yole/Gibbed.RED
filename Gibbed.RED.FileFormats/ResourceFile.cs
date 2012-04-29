@@ -99,9 +99,12 @@ namespace Gibbed.RED.FileFormats
             {
                 input.Seek(dependencyDataOffset, SeekOrigin.Begin);
 
+                info.Dependencies = new string[dependencyCount];
                 for (uint i = 1; i < dependencyCount; i++)
                 {
-                    this.Dependencies.Add(input.ReadEncodedString());
+                    var path = input.ReadEncodedString();
+                    info.Dependencies[i] = path;
+                    this.Dependencies.Add(path);
                 }
             }
 

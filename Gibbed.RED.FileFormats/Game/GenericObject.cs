@@ -83,10 +83,6 @@ namespace Gibbed.RED.FileFormats.Game
         {
             if (stream.Mode == SerializeMode.Reading)
             {
-                if (_type == "CFootstepData")
-                {
-                    Debugger.Break();
-                }
                 PropertySerializer.Serialize(this, stream);
                 stream.SerializeValue(ref _objectUnknown);
             }

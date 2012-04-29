@@ -260,6 +260,14 @@ namespace Gibbed.RED.FileFormats.Resource
             value = list;
         }
 
+        public void SerializeDependency(ref string value)
+        {
+            var data = Stream.ReadValueU16();
+            if (data > 0 && Info.Dependencies == null)
+                throw new FormatException();
+            value = Info.Dependencies[data];
+        }
+
         #endregion
     }
 }

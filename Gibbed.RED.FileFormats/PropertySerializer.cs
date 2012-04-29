@@ -121,6 +121,10 @@ namespace Gibbed.RED.FileFormats
             {
                 return new PointerSerializer();
             }
+            if (type.StartsWith("~"))
+            {
+                return new DependencySerializer();
+            }
             if (type.StartsWith("E") && Char.IsUpper(type[1]))
             {
                 // it's actually an enum but we simply deserialize the enum member name
