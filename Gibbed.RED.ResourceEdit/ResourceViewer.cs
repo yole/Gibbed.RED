@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
+using Gibbed.RED.FileFormats.Game;
 
 namespace Gibbed.RED.ResourceEdit
 {
@@ -175,6 +176,23 @@ namespace Gibbed.RED.ResourceEdit
         private void OnViewObject(object sender, EventArgs e)
         {
             this.OpenObject(this.entryTreeView.SelectedNode);
+        }
+
+        private void OnExportUndecoded(object sender, EventArgs e)
+        {
+            var obj = entryTreeView.SelectedNode.Tag as FileFormats.Resource.ObjectInfo;
+            if (obj != null && obj.Data is GenericObject)
+            {
+                var genericObject = (GenericObject) obj.Data;
+                if (genericObject.UndecodedData != null)
+                {
+                    if (saveUndecodedDialog.ShowDialog(this) != DialogResult.OK) return;
+                    using (var f = File.OpenWrite(saveUndecodedDialog.FileName))
+                    {
+                        f.Write(genericObject.UndecodedData, 0, genericObject.UndecodedData.Length);
+                    }
+                }
+            }
         }
     }
 }

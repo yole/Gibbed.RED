@@ -58,8 +58,10 @@ namespace Gibbed.RED.ResourceEdit
             this.saveResourceButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.viewObjectButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.entryTreeView = new System.Windows.Forms.TreeView();
             this.typeImageList = new System.Windows.Forms.ImageList(this.components);
+            this.saveUndecodedDialog = new System.Windows.Forms.SaveFileDialog();
             this.statusStrip.SuspendLayout();
             this.toolStrip.SuspendLayout();
             this.SuspendLayout();
@@ -85,7 +87,8 @@ namespace Gibbed.RED.ResourceEdit
             this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.saveResourceButton,
             this.toolStripSeparator1,
-            this.viewObjectButton});
+            this.viewObjectButton,
+            this.toolStripButton1});
             this.toolStrip.Location = new System.Drawing.Point(0, 0);
             this.toolStrip.Name = "toolStrip";
             this.toolStrip.Size = new System.Drawing.Size(480, 25);
@@ -114,6 +117,16 @@ namespace Gibbed.RED.ResourceEdit
             this.viewObjectButton.Size = new System.Drawing.Size(90, 22);
             this.viewObjectButton.Text = "View Object";
             this.viewObjectButton.Click += new System.EventHandler(this.OnViewObject);
+            // 
+            // toolStripButton1
+            // 
+            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
+            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton1.Name = "toolStripButton1";
+            this.toolStripButton1.Size = new System.Drawing.Size(108, 22);
+            this.toolStripButton1.Text = "Export Undecoded";
+            this.toolStripButton1.Click += new System.EventHandler(this.OnExportUndecoded);
             // 
             // entryTreeView
             // 
@@ -163,5 +176,7 @@ namespace Gibbed.RED.ResourceEdit
         private System.Windows.Forms.ToolStripButton viewObjectButton;
         private System.Windows.Forms.TreeView entryTreeView;
         private System.Windows.Forms.ImageList typeImageList;
+        private System.Windows.Forms.ToolStripButton toolStripButton1;
+        private System.Windows.Forms.SaveFileDialog saveUndecodedDialog;
     }
 }
