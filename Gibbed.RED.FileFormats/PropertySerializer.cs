@@ -121,7 +121,7 @@ namespace Gibbed.RED.FileFormats
             {
                 return new PointerSerializer();
             }
-            if (type.StartsWith("E"))
+            if (type.StartsWith("E") && Char.IsUpper(type[1]))
             {
                 // it's actually an enum but we simply deserialize the enum member name
                 return new CNameSerializer();
@@ -138,6 +138,7 @@ namespace Gibbed.RED.FileFormats
                 case "TagList": return new TagListSerializer();
                 case "CVariant": return new CVariantSerializer();
                 case "CGUID": return new GuidSerializer();
+                case "EngineTransform": return new EngineTransformSerializer();
                 default: return null;
             }
         }
