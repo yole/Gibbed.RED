@@ -28,9 +28,16 @@ namespace Gibbed.RED.ResourceEdit
             {
                 foreach (string name in data.PropertyValues)
                 {
-                    ListViewItem item = new ListViewItem(name);
+                    var item = new ListViewItem(name);
                     item.SubItems.Add(data.GetDataType(name));
                     item.SubItems.Add(data.GetPropertyValueAsString(name, _explorer.StringsFile));
+                    listView1.Items.Add(item);
+                }
+                if (data.UndecodedData != null)
+                {
+                    var item = new ListViewItem("<undecoded data>");
+                    item.SubItems.Add("byte[]");
+                    item.SubItems.Add(data.UndecodedData.Length + " bytes");
                     listView1.Items.Add(item);
                 }
             }

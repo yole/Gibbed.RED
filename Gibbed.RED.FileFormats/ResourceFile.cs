@@ -182,9 +182,19 @@ namespace Gibbed.RED.FileFormats
                     {
                         obj.Data.Serialize(reader);
 
-                        if (!(obj.Data is GenericObject) && reader.Position != reader.Length)
+                        var bytesRemaining = reader.Length - reader.Position;
+                        if (bytesRemaining > 0)
                         {
-                            throw new FormatException();
+                            if (obj.Data is GenericObject)
+                            {
+                                byte[] undecodedData = new byte[bytesRemaining];
+                                Array.Copy(data, reader.Position, undecodedData, 0, bytesRemaining);
+                                ((GenericObject) obj.Data).UndecodedData = undecodedData;
+                            }
+                            else
+                            {
+                                throw new FormatException();
+                            }
                         }
                     }
                 }

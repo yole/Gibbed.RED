@@ -26,7 +26,7 @@ using Gibbed.RED.FileFormats.Serializers;
 
 namespace Gibbed.RED.FileFormats.Game
 {
-    [ResourceHandler("CMesh")]
+//    [ResourceHandler("CMesh")]
     public class CMesh : CResource
     {
         [PropertyName("materials")]
